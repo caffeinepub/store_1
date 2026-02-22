@@ -1,0 +1,210 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Remove user accounts, add homepage/social customization, redesign shop navigation",
+  "requirements": [
+    {
+      "id": "REQ-12",
+      "summary": "Remove the entire user account system for regular customers: delete ProfileSetupModal component, remove profile-related hooks, remove account/order history pages for non-admin users, and remove all profile/account UI from the frontend",
+      "acceptanceCriteria": [
+        "ProfileSetupModal component is deleted",
+        "useUserProfile hook is removed or restricted to admin-only use",
+        "Account page and order history page are removed for non-admin users",
+        "No profile setup prompts appear for regular customers",
+        "Customers can only checkout as guests through Stripe"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ProfileSetupModal.tsx",
+          "operation": "delete",
+          "description": "Delete the ProfileSetupModal component that prompts users to enter their name on first login"
+        },
+        {
+          "path": "frontend/src/hooks/useUserProfile.ts",
+          "operation": "delete",
+          "description": "Remove the useUserProfile hook that manages customer profile data"
+        },
+        {
+          "path": "frontend/src/pages/AccountPage.tsx",
+          "operation": "delete",
+          "description": "Delete the AccountPage that displays customer account information and shipping address"
+        },
+        {
+          "path": "frontend/src/pages/OrderHistoryPage.tsx",
+          "operation": "delete",
+          "description": "Delete the OrderHistoryPage that shows customer order history"
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "modify",
+          "description": "Remove ProfileSetupModal import and rendering from the Layout component to prevent profile setup prompts for customers"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Remove route definitions for AccountPage and OrderHistoryPage to prevent customer access to account features"
+        },
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Remove any navigation links or menu items pointing to account or order history pages for regular customers"
+        },
+        {
+          "path": "frontend/src/pages/CheckoutPage.tsx",
+          "operation": "modify",
+          "description": "Ensure checkout flow works as guest-only without requiring user profiles or saved shipping addresses"
+        }
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "summary": "Update Privacy Policy to remove all sections related to customer Internet Identity authentication and user account data storage, keeping only admin authentication and guest checkout information",
+      "acceptanceCriteria": [
+        "Privacy Policy no longer mentions customer Internet Identity authentication",
+        "Privacy Policy no longer references user account data storage for customers",
+        "Privacy Policy accurately reflects guest-only checkout model",
+        "Admin authentication information remains if relevant"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PrivacyPolicyPage.tsx",
+          "operation": "modify",
+          "description": "Remove all sections about customer Internet Identity authentication and user account data storage. Update content to reflect guest-only checkout model while keeping admin authentication details if needed. Focus on Stripe payment data handling and newsletter email storage only."
+        }
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "summary": "Update Terms of Service to remove all account-related sections for customers, including account creation, profile management, and any references to customer login requirements",
+      "acceptanceCriteria": [
+        "Terms of Service no longer references customer account creation or management",
+        "Terms of Service reflects guest-only checkout model",
+        "Final sale policy and age requirements remain intact"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/TermsOfServicePage.tsx",
+          "operation": "modify",
+          "description": "Remove all sections referencing customer account creation, profile management, and login requirements. Update content to reflect guest-only checkout while preserving final sale policy, age requirements (13+), and product/pricing terms."
+        }
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "summary": "Add admin dashboard fields for customizable homepage hero section: create input fields for hero image upload with preview, editable headline text, and editable tagline text, with frontend rendering",
+      "acceptanceCriteria": [
+        "Admin dashboard includes image upload field for homepage hero background",
+        "Admin dashboard includes text input for hero headline",
+        "Admin dashboard includes text input for hero tagline",
+        "Changes save to backend and persist across sessions",
+        "Homepage renders the custom hero image, headline, and tagline",
+        "Image upload shows preview before saving"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useHeroSection.ts",
+          "operation": "create",
+          "description": "Create React Query hooks for fetching and updating the hero section data using backend getHeroSection() and setHeroSection() capabilities. Include image upload handling with ExternalBlob. Verify the blob-storage component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/AdminHeroSectionPage.tsx",
+          "operation": "create",
+          "description": "Create admin page with form fields for hero image upload (with preview using ExternalBlob.getDirectURL()), headline text input (default: 'STREETWEAR REDEFINED'), and tagline text input (default: 'Exclusive drops. Limited editions. Unmatched style.'). Include save button that calls useHeroSection mutation. Show loading states and success/error toasts."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Update the hero section to dynamically render custom image, headline, and tagline from useHeroSection hook. Use ExternalBlob.getDirectURL() for the background image. Fall back to default values if no custom content is set."
+        },
+        {
+          "path": "frontend/src/pages/AdminDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Add navigation card for 'Hero Section' linking to /admin/hero-section route in the admin dashboard"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add route definition for /admin/hero-section path pointing to AdminHeroSectionPage component"
+        }
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "summary": "Add admin dashboard fields for editable social media URLs: create input fields for YouTube, Instagram, TikTok, Twitch, and Kick URLs, and update the footer to render links using these admin-configured URLs",
+      "acceptanceCriteria": [
+        "Admin dashboard includes URL input fields for YouTube, Instagram, TikTok, Twitch, and Kick",
+        "URLs save to backend and persist across sessions",
+        "Footer social media links use the admin-configured URLs",
+        "Empty URL fields hide corresponding social icons in footer"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useSocialLinks.ts",
+          "operation": "create",
+          "description": "Create React Query hooks for fetching and updating social media links using backend getSocialLinks() and setSocialLinks() capabilities. Include validation for URL format."
+        },
+        {
+          "path": "frontend/src/pages/AdminSocialLinksPage.tsx",
+          "operation": "create",
+          "description": "Create admin page with text input fields for YouTube, Instagram, TikTok, Twitch, and Kick URLs. Include save button that calls useSocialLinks mutation. Show current values from backend and provide URL validation feedback. Show loading states and success/error toasts."
+        },
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Update Footer component to fetch social links from useSocialLinks hook. Conditionally render social media icons and links only when corresponding URLs are configured. Use the admin-configured URLs instead of hardcoded values."
+        },
+        {
+          "path": "frontend/src/pages/AdminDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Add navigation card for 'Social Links' linking to /admin/social-links route in the admin dashboard"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add route definition for /admin/social-links path pointing to AdminSocialLinksPage component"
+        }
+      ]
+    },
+    {
+      "id": "REQ-18",
+      "summary": "Remove the hover dropdown functionality from the Shop navigation link in the Header component, making it a simple direct link to the shop page without any dropdown or category list",
+      "acceptanceCriteria": [
+        "Shop link in header navigation is a simple direct link with no hover behavior",
+        "ShopDropdown component is removed or no longer rendered in header",
+        "Clicking Shop link navigates directly to /shop page",
+        "No dropdown or category list appears on hover"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Remove ShopDropdown component import and rendering from the Header. Replace the dropdown trigger with a simple Link component pointing to /shop that navigates directly without any hover behavior or category list."
+        },
+        {
+          "path": "frontend/src/components/ShopDropdown.tsx",
+          "operation": "delete",
+          "description": "Delete the ShopDropdown component as it is no longer used in the navigation"
+        }
+      ]
+    },
+    {
+      "id": "REQ-19",
+      "summary": "Redesign the shop page category filter from dropdown to horizontal pill-style buttons: replace the 'Filter by category' dropdown with a horizontal row of pill-shaped category buttons styled with the electric blue accent color, dark backgrounds, and smooth transitions",
+      "acceptanceCriteria": [
+        "Shop page displays horizontal pill-style category buttons instead of dropdown",
+        "Pills use electric blue accent color for active/selected state",
+        "Pills have dark backgrounds with smooth hover transitions",
+        "Category filter functionality remains the same (filtering products by category)",
+        "Design is mobile-responsive with horizontal scrolling if needed",
+        "Visual style matches the streetwear aesthetic with floating depth effects"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/ShopPage.tsx",
+          "operation": "modify",
+          "description": "Replace the category dropdown with a horizontal row of pill-style buttons. Style buttons with electric blue accent (#00D9FF or theme accent color) for active state, dark backgrounds with hover transitions, rounded-full pill shape, and smooth animations. Add 'All' button to show all products. Ensure mobile-responsive with horizontal scrolling using overflow-x-auto. Preserve category filtering logic using selectedCategory state."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-remove-the-entire-user-account-system-for-regular-customers-delete-profilesetupmodal-component-remove-profile-related-hooks-useuserprofile-remove-account-order-history-pages-for-non-admin-users-and-remove-all-profile-account-ui-from-the-frontend-that-was-intended-for-regular-customers",
+      "featureTitle": "Remove the entire user account system for regular customers: delete ProfileSetupModal component, remove profile-related hooks (useUserProfile), remove account/order history pages for non-admin users, and remove all profile/account UI from the frontend that was intended for regular customers",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/Header.tsx",
+        "frontend/src/components/Layout.tsx",
+        "frontend/src/components/ProfileSetupModal.tsx",
+        "frontend/src/hooks/useUserProfile.ts",
+        "frontend/src/pages/AccountPage.tsx",
+        "frontend/src/pages/OrderHistoryPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-12"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-privacy-policy-to-remove-all-sections-related-to-customer-internet-identity-authentication-and-user-account-data-storage-keeping-only-admin-authentication-and-guest-checkout-information",
+      "featureTitle": "Update Privacy Policy to remove all sections related to customer Internet Identity authentication and user account data storage, keeping only admin authentication and guest checkout information",
+      "files": [
+        "frontend/src/pages/PrivacyPolicyPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-14"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-terms-of-service-to-remove-all-account-related-sections-for-customers-including-account-creation-profile-management-and-any-references-to-customer-login-requirements",
+      "featureTitle": "Update Terms of Service to remove all account-related sections for customers, including account creation, profile management, and any references to customer login requirements",
+      "files": [
+        "frontend/src/pages/TermsOfServicePage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-15"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-admin-dashboard-fields-for-customizable-homepage-hero-section-create-input-fields-for-hero-image-upload-with-preview-editable-headline-text-currently-streetwear-redefined-and-editable-tagline-text-currently-exclusive-drops-limited-editions-unmatched-style-with-backend-storage-and-frontend-rendering",
+      "featureTitle": "Add admin dashboard fields for customizable homepage hero section: create input fields for hero image upload (with preview), editable headline text (currently 'STREETWEAR REDEFINED'), and editable tagline text (currently 'Exclusive drops. Limited editions. Unmatched style.'), with backend storage and frontend rendering",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/hooks/useHeroSection.ts",
+        "frontend/src/pages/AdminDashboardPage.tsx",
+        "frontend/src/pages/AdminHeroSectionPage.tsx",
+        "frontend/src/pages/HomePage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-16"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-admin-dashboard-fields-for-editable-social-media-urls-create-input-fields-for-youtube-instagram-tiktok-twitch-and-kick-urls-with-backend-storage-and-update-the-footer-to-render-links-using-these-admin-configured-urls",
+      "featureTitle": "Add admin dashboard fields for editable social media URLs: create input fields for YouTube, Instagram, TikTok, Twitch, and Kick URLs with backend storage, and update the footer to render links using these admin-configured URLs",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/Footer.tsx",
+        "frontend/src/hooks/useSocialLinks.ts",
+        "frontend/src/pages/AdminDashboardPage.tsx",
+        "frontend/src/pages/AdminSocialLinksPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-17"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-remove-the-hover-dropdown-functionality-from-the-shop-navigation-link-in-the-header-component-making-it-a-simple-direct-link-to-the-shop-page-without-any-dropdown-or-category-list",
+      "featureTitle": "Remove the hover dropdown functionality from the Shop navigation link in the Header component, making it a simple direct link to the shop page without any dropdown or category list",
+      "files": [
+        "frontend/src/components/Header.tsx",
+        "frontend/src/components/ShopDropdown.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-18"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-redesign-the-shop-page-category-filter-from-dropdown-to-horizontal-pill-style-buttons-replace-the-filter-by-category-dropdown-with-a-horizontal-row-of-pill-shaped-category-buttons-styled-with-the-electric-blue-accent-color-dark-backgrounds-and-smooth-transitions-that-match-the-streetwear-aesthetic",
+      "featureTitle": "Redesign the shop page category filter from dropdown to horizontal pill-style buttons: replace the 'Filter by category' dropdown with a horizontal row of pill-shaped category buttons styled with the electric blue accent color, dark backgrounds, and smooth transitions that match the streetwear aesthetic",
+      "files": [
+        "frontend/src/pages/ShopPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-19"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

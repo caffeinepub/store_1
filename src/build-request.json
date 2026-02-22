@@ -1,0 +1,190 @@
+{
+  "kind": "build_request",
+  "title": "Remove user accounts, add homepage/social customization, redesign shop navigation",
+  "projectName": "Streetwear Platform",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-12",
+      "text": "Remove the entire user account system for regular customers: delete ProfileSetupModal component, remove profile-related hooks (useUserProfile), remove account/order history pages for non-admin users, and remove all profile/account UI from the frontend that was intended for regular customers",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-16"
+        ],
+        "quotes": [
+          "Yes, specifically the privacy section part talking about internet Identity but if it effects more legal, update whatever is needed to be changed"
+        ]
+      },
+      "acceptanceCriteria": [
+        "ProfileSetupModal component is deleted",
+        "useUserProfile hook is removed or restricted to admin-only use",
+        "Account page and order history page are removed for non-admin users",
+        "No profile setup prompts appear for regular customers",
+        "Customers can only checkout as guests through Stripe"
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "text": "Implement first-user-becomes-admin authentication: modify backend to automatically grant admin privileges to the first user who logs in with Internet Identity, and ensure subsequent users do not receive admin access",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-14"
+        ],
+        "quotes": [
+          "We can make it the first user"
+        ]
+      },
+      "acceptanceCriteria": [
+        "First Internet Identity principal to authenticate is automatically granted admin access",
+        "Subsequent logins do not receive admin privileges",
+        "Admin status persists across sessions",
+        "Admin can access /admin dashboard after first login"
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "text": "Update Privacy Policy to remove all sections related to customer Internet Identity authentication and user account data storage, keeping only admin authentication and guest checkout information",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-16"
+        ],
+        "quotes": [
+          "Yes, specifically the privacy section part talking about internet Identity but if it effects more legal, update whatever is needed to be changed"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Privacy Policy no longer mentions customer Internet Identity authentication",
+        "Privacy Policy no longer references user account data storage for customers",
+        "Privacy Policy accurately reflects guest-only checkout model",
+        "Admin authentication information remains if relevant"
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "text": "Update Terms of Service to remove all account-related sections for customers, including account creation, profile management, and any references to customer login requirements",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-16"
+        ],
+        "quotes": [
+          "if it effects more legal, update whatever is needed to be changed"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Terms of Service no longer references customer account creation or management",
+        "Terms of Service reflects guest-only checkout model",
+        "Final sale policy and age requirements remain intact"
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "text": "Add admin dashboard fields for customizable homepage hero section: create input fields for hero image upload (with preview), editable headline text (currently 'STREETWEAR REDEFINED'), and editable tagline text (currently 'Exclusive drops. Limited editions. Unmatched style.'), with backend storage and frontend rendering",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-15"
+        ],
+        "quotes": [
+          "I would like to change the image whenever I want in the admin page",
+          "You want 'STREETWEAR REDEFINED' and the tagline 'Exclusive drops. Limited editions. Unmatched style.' to be editable fields in the admin dashboard alongside the hero image we discussed earlier, correct?",
+          "Yes please"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin dashboard includes image upload field for homepage hero background",
+        "Admin dashboard includes text input for hero headline",
+        "Admin dashboard includes text input for hero tagline",
+        "Changes save to backend and persist across sessions",
+        "Homepage renders the custom hero image, headline, and tagline",
+        "Image upload shows preview before saving"
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "text": "Add admin dashboard fields for editable social media URLs: create input fields for YouTube, Instagram, TikTok, Twitch, and Kick URLs with backend storage, and update the footer to render links using these admin-configured URLs",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-15"
+        ],
+        "quotes": [
+          "Just want to edit the URLs so we can put the specific ones that take users to our channels"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin dashboard includes URL input fields for YouTube, Instagram, TikTok, Twitch, and Kick",
+        "URLs save to backend and persist across sessions",
+        "Footer social media links use the admin-configured URLs",
+        "Empty URL fields hide corresponding social icons in footer"
+      ]
+    },
+    {
+      "id": "REQ-18",
+      "text": "Remove the hover dropdown functionality from the Shop navigation link in the Header component, making it a simple direct link to the shop page without any dropdown or category list",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-14"
+        ],
+        "quotes": [
+          "Also the on the nav bar I no longer want it to open that horizontal box when hovering over the shop, We can completely delete that idea"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Shop link in header navigation is a simple direct link with no hover behavior",
+        "ShopDropdown component is removed or no longer rendered in header",
+        "Clicking Shop link navigates directly to /shop page",
+        "No dropdown or category list appears on hover"
+      ]
+    },
+    {
+      "id": "REQ-19",
+      "text": "Redesign the shop page category filter from dropdown to horizontal pill-style buttons: replace the 'Filter by category' dropdown with a horizontal row of pill-shaped category buttons styled with the electric blue accent color, dark backgrounds, and smooth transitions that match the streetwear aesthetic",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-14",
+          "msg-15"
+        ],
+        "quotes": [
+          "When I view the shop you have it setup like this: 'Filter by category:' with a drop down box, i think its pretty ugly, what can we do to make it seamless and visually pleasing?",
+          "horizontal pill categories sound good"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Shop page displays horizontal pill-style category buttons instead of dropdown",
+        "Pills use electric blue accent color for active/selected state",
+        "Pills have dark backgrounds with smooth hover transitions",
+        "Category filter functionality remains the same (filtering products by category)",
+        "Design is mobile-responsive with horizontal scrolling if needed",
+        "Visual style matches the streetwear aesthetic with floating depth effects"
+      ]
+    }
+  ],
+  "constraints": [
+    "Maintain single-actor backend architecture in backend/main.mo",
+    "Do not modify immutable frontend paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui/*",
+    "Preserve existing Stripe payment integration for guest checkout",
+    "Keep all existing product catalog features including categories, sizes, colors, and drag-and-drop ordering",
+    "Maintain dynamic shipping calculator logic with existing regional pricing",
+    "Preserve admin dashboard functionality for products, categories, orders, analytics, and contact forms",
+    "Keep newsletter signup form and storage in footer",
+    "Maintain manual Printify fulfillment workflow with ORDER-XXXX format"
+  ],
+  "nonGoals": [
+    "Implementing automated newsletter sending (requires external email service)",
+    "Integrating Printify API for automatic order fulfillment",
+    "Creating user accounts or login for regular customers",
+    "Adding order tracking for customers (no user accounts = no order history access)",
+    "Implementing real-time inventory sync with Printify",
+    "Adding customer profile features or saved shipping addresses for non-admin users"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

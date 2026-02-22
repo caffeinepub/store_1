@@ -1,0 +1,281 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 5,
+  "summary": "Streetwear e-commerce platform with electric blue accents, black backgrounds, white text. Product catalog with unlimited custom categories (drag-and-drop ordering), sizes S-5XL, color variants. Dynamic shipping calculator (US 3-speed options: Economy $3.99+$2.09, Standard $4.75+$2.40, Express $7.99+$2.40; Canada $9.39+$4.39; Australia $12.49+$4.99; Rest of World $10.00+$4.00). Stripe checkout with GUEST-ONLY checkout (no user accounts). Admin dashboard at /admin with first-user-becomes-admin authentication, product/category management, customizable homepage hero (image/headline/tagline), editable social media URLs (YouTube/Instagram/TikTok/Twitch/Kick), Printify-formatted order fulfillment, per-order cost tracking, financial analytics, newsletter management, contact form inbox. Footer with newsletter signup and social links - NO Caffeine branding. Legal pages: Terms (final sale, 13+ age requirement, updated to remove account sections), Privacy (updated to remove customer Internet Identity sections), Shipping/Returns (international customs disclaimer), Refund Policy. Manual Printify fulfillment workflow with ORDER-XXXX references. Mobile-first design with floating depth animations, parallax scrolling, smooth transitions. Shop page with horizontal pill-style category filters, direct navigation link (no hover dropdown).",
+  "architectural_notes": [
+    "Backend: Motoko canisters on Internet Computer storing products, categories, orders, user accounts, newsletter signups, contact submissions",
+    "Frontend: React 18 + TypeScript with Vite, Tailwind CSS for styling, React Query for state management",
+    "Authentication: Internet Identity supporting biometric, Google, Apple, Microsoft login methods",
+    "Payments: Stripe API integration with website calculating total (product price + dynamic shipping) and sending to Stripe",
+    "Shipping: Dynamic calculator based on destination country with US offering 3 speeds (Economy/Standard/Express), international offering Standard only",
+    "Order fulfillment: Manual Printify workflow with admin dashboard formatting all order details for easy copy-paste to Printify",
+    "Cost tracking: Per-order actual cost field (editable after Printify fulfillment) for accurate profit calculations",
+    "Newsletter: Form stores emails in database for export (no direct email sending capability)",
+    "Mobile-first: Responsive design optimized for phone screens with touch-friendly interactions",
+    "Authentication: Only admin access via Internet Identity (first user to log in automatically becomes admin), no customer accounts"
+  ],
+  "known_issues": [
+    "Newsletter signup stores emails but cannot send newsletters directly - requires external email service integration",
+    "Printify API not available - manual order entry required using formatted dashboard data",
+    "Per-order cost tracking requires manual entry after Printify fulfillment - no automatic cost sync",
+    "International customs/duties fees handled by destination country, not included in checkout total",
+    "Legal pages updated to reflect guest-only checkout model (no customer accounts or Internet Identity for regular users)"
+  ],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-create-a-product-catalog-system-with-unlimited-custom-categories-that-can-be-managed-by-admin-including-drag-and-drop-ordering-for-both-categories-and-products-within-categories",
+      "title": "Create a product catalog system with unlimited custom categories that can be managed by admin, including drag-and-drop ordering for both categories and products within categories",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-dynamic-shipping-calculator-that-calculates-real-time-shipping-costs-at-checkout-based-on-cart-weight-and-destination-with-us-having-three-speed-options-economy-3-99-base-2-09-per-item-standard-4-75-base-2-40-per-item-express-7-99-base-2-40-per-item-canada-single-option-9-39-base-4-39-per-item-australia-single-option-12-49-base-4-99-per-item-and-rest-of-world-single-option-10-00-base-4-00-per-item",
+      "title": "Build a dynamic shipping calculator that calculates real-time shipping costs at checkout based on cart weight and destination, with US having three speed options (Economy $3.99 base + $2.09 per item, Standard $4.75 base + $2.40 per item, Express $7.99 base + $2.40 per item), Canada single option ($9.39 base + $4.39 per item), Australia single option ($12.49 base + $4.99 per item), and Rest of World single option ($10.00 base + $4.00 per item)",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-integrate-stripe-payment-processing-that-allows-guest-checkout-or-optional-internet-identity-login-supporting-biometric-google-apple-and-microsoft-authentication",
+      "title": "Integrate Stripe payment processing that allows guest checkout or optional Internet Identity login (supporting biometric, Google, Apple, and Microsoft authentication)",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-user-account-system-with-internet-identity-integration-that-stores-order-history-and-allows-customers-to-save-a-default-shipping-address",
+      "title": "Create user account system with Internet Identity integration that stores order history and allows customers to save a default shipping address",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-comprehensive-admin-dashboard-at-admin-route-with-product-and-category-management-order-fulfillment-view-formatted-for-manual-printify-entry-with-order-xxxx-reference-format-editable-per-order-cost-tracking-field-for-entering-actual-printify-costs-after-fulfillment-financial-analytics-showing-revenue-versus-actual-costs-to-calculate-real-profit-newsletter-subscriber-management-with-email-export-capability-and-contact-form-inbox",
+      "title": "Build comprehensive admin dashboard at /admin route with product and category management, order fulfillment view formatted for manual Printify entry with ORDER-XXXX reference format, editable per-order cost tracking field for entering actual Printify costs after fulfillment, financial analytics showing revenue versus actual costs to calculate real profit, newsletter subscriber management with email export capability, and contact form inbox",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-footer-with-newsletter-signup-form-that-stores-email-addresses-for-admin-export-and-social-media-links-for-youtube-instagram-tiktok-twitch-and-kick-with-no-caffeine-branding-anywhere-on-the-site",
+      "title": "Create footer with newsletter signup form that stores email addresses for admin export, and social media links for YouTube, Instagram, TikTok, Twitch, and Kick, with no Caffeine branding anywhere on the site",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-professional-legal-pages-including-terms-of-service-with-final-sale-no-returns-policy-and-13-age-requirement-with-parental-permission-privacy-policy-shipping-returns-policy-with-international-customs-disclaimer-stating-customers-are-responsible-for-customs-duties-and-import-taxes-and-refund-policy-all-tailored-for-a-print-on-demand-streetwear-business-with-placeholders-for-business-name-and-support-email",
+      "title": "Create professional legal pages including Terms of Service (with final sale/no returns policy and 13+ age requirement with parental permission), Privacy Policy, Shipping & Returns Policy (with international customs disclaimer stating customers are responsible for customs duties and import taxes), and Refund Policy, all tailored for a print-on-demand streetwear business with placeholders for business name and support email",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-mobile-first-responsive-design-with-electric-blue-accent-color-black-dark-backgrounds-white-body-text-high-contrast-streetwear-aesthetic-floating-depth-animations-parallax-scrolling-effects-and-smooth-transitions-throughout-the-site",
+      "title": "Implement mobile-first responsive design with electric blue accent color, black/dark backgrounds, white body text, high-contrast streetwear aesthetic, floating depth animations, parallax scrolling effects, and smooth transitions throughout the site",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-navigation-header-with-home-link-shop-link-with-hover-dropdown-showing-horizontal-category-list-contact-link-and-shopping-cart-icon-with-item-count-badge",
+      "title": "Create navigation header with Home link, Shop link with hover dropdown showing horizontal category list, Contact link, and shopping cart icon with item count badge",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-contact-form-that-stores-submissions-in-backend-for-admin-review-in-dashboard-inbox",
+      "title": "Implement contact form that stores submissions in backend for admin review in dashboard inbox",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-entire-user-account-system-for-regular-customers-delete-profilesetupmodal-component-remove-profile-related-hooks-useuserprofile-remove-account-order-history-pages-for-non-admin-users-and-remove-all-profile-account-ui-from-the-frontend-that-was-intended-for-regular-customers",
+      "title": "Remove the entire user account system for regular customers: delete ProfileSetupModal component, remove profile-related hooks (useUserProfile), remove account/order history pages for non-admin users, and remove all profile/account UI from the frontend that was intended for regular customers",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-privacy-policy-to-remove-all-sections-related-to-customer-internet-identity-authentication-and-user-account-data-storage-keeping-only-admin-authentication-and-guest-checkout-information",
+      "title": "Update Privacy Policy to remove all sections related to customer Internet Identity authentication and user account data storage, keeping only admin authentication and guest checkout information",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-terms-of-service-to-remove-all-account-related-sections-for-customers-including-account-creation-profile-management-and-any-references-to-customer-login-requirements",
+      "title": "Update Terms of Service to remove all account-related sections for customers, including account creation, profile management, and any references to customer login requirements",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-admin-dashboard-fields-for-customizable-homepage-hero-section-create-input-fields-for-hero-image-upload-with-preview-editable-headline-text-currently-streetwear-redefined-and-editable-tagline-text-currently-exclusive-drops-limited-editions-unmatched-style-with-backend-storage-and-frontend-rendering",
+      "title": "Add admin dashboard fields for customizable homepage hero section: create input fields for hero image upload (with preview), editable headline text (currently 'STREETWEAR REDEFINED'), and editable tagline text (currently 'Exclusive drops. Limited editions. Unmatched style.'), with backend storage and frontend rendering",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-admin-dashboard-fields-for-editable-social-media-urls-create-input-fields-for-youtube-instagram-tiktok-twitch-and-kick-urls-with-backend-storage-and-update-the-footer-to-render-links-using-these-admin-configured-urls",
+      "title": "Add admin dashboard fields for editable social media URLs: create input fields for YouTube, Instagram, TikTok, Twitch, and Kick URLs with backend storage, and update the footer to render links using these admin-configured URLs",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-hover-dropdown-functionality-from-the-shop-navigation-link-in-the-header-component-making-it-a-simple-direct-link-to-the-shop-page-without-any-dropdown-or-category-list",
+      "title": "Remove the hover dropdown functionality from the Shop navigation link in the Header component, making it a simple direct link to the shop page without any dropdown or category list",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-shop-page-category-filter-from-dropdown-to-horizontal-pill-style-buttons-replace-the-filter-by-category-dropdown-with-a-horizontal-row-of-pill-shaped-category-buttons-styled-with-the-electric-blue-accent-color-dark-backgrounds-and-smooth-transitions-that-match-the-streetwear-aesthetic",
+      "title": "Redesign the shop page category filter from dropdown to horizontal pill-style buttons: replace the 'Filter by category' dropdown with a horizontal row of pill-shaped category buttons styled with the electric blue accent color, dark backgrounds, and smooth transitions that match the streetwear aesthetic",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Product catalog with unlimited custom categories, drag-and-drop ordering, sizes S-5XL, color variants, multiple images per product",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Dynamic shipping calculator (US 3-speed, Canada, Australia, Rest of World) with real-time cost calculation at checkout",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Stripe payment integration with guest checkout or Internet Identity login (biometric/Google/Apple/Microsoft)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Admin dashboard at /admin with product/category management, Printify-formatted order export, per-order cost tracking, financial analytics",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Newsletter signup form in footer storing emails for export, contact form with admin inbox",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Legal pages (Terms, Privacy, Shipping/Returns, Refund Policy) tailored for print-on-demand with final sale policy, 13+ age requirement, international customs disclaimer",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Mobile-first design with electric blue accents, black backgrounds, white text, floating depth animations, parallax scrolling, smooth transitions",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Navigation with Home, Shop (hover dropdown with horizontal category list), Contact, and Cart icon",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Footer with social links (YouTube, Instagram, TikTok, Twitch, Kick) and no Caffeine branding",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Implement product management with support for multiple images per product, sizes (S, M, L, XL, 2XL, 3XL, 4XL, 5XL), and color variants",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Remove user account system for regular customers, implement guest-only Stripe checkout",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Implement first-user-becomes-admin authentication system",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Add admin dashboard fields for customizable homepage hero (image upload, headline text, tagline text)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Add admin dashboard fields for editable social media URLs (YouTube, Instagram, TikTok, Twitch, Kick)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Remove Shop hover dropdown from navigation, make it a direct link to shop page",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Replace shop page dropdown filter with horizontal pill-style category buttons above products",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Update Privacy Policy and Terms of Service to remove customer Internet Identity and account-related sections",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Implement first-user-becomes-admin authentication: modify backend to automatically grant admin privileges to the first user who logs in with Internet Identity, and ensure subsequent users do not receive admin access",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Store",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

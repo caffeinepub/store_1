@@ -1,0 +1,64 @@
+{
+  "kind": "build_request",
+  "title": "Fix admin bootstrap: first login user auto-assigned permanent admin rights",
+  "projectName": "Streetwear Store",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Update the backend admin initialization logic so that if no admin has been assigned yet (i.e., the admin list is empty), the first caller to invoke `isCallerAdmin` or any admin-gated function is automatically and permanently stored as an admin. This bootstrap assignment must persist across canister upgrades.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-8",
+          "msg-10"
+        ],
+        "quotes": [
+          "first time yes",
+          "I'm ready to fix this by updating the admin initialization logic so that the first user to log in is automatically assigned admin rights permanently"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When no admin exists in stable storage, the first authenticated caller is recorded as admin",
+        "The first caller's principal is persisted in stable storage and survives canister upgrades",
+        "Subsequent callers who are not in the admin list continue to receive access denied",
+        "Calling `isCallerAdmin` returns `true` for the bootstrapped admin principal",
+        "After bootstrap, a second distinct principal calling `isCallerAdmin` returns `false`"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Update the frontend `AdminDashboardPage` so that after a successful Internet Identity login, the admin check is re-evaluated immediately and the user is shown the admin dashboard without receiving an 'access denied' message when they are the bootstrapped first admin.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7",
+          "msg-8"
+        ],
+        "quotes": [
+          "I keep getting access denied when I login",
+          "immediately"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After logging in as the first user (bootstrap admin), the admin dashboard grid is displayed without an access denied message",
+        "The `useAdminCheck` hook result is refreshed after authentication so stale denial state is not shown",
+        "If the user is genuinely not an admin, the access denied message is still shown correctly"
+      ]
+    }
+  ],
+  "constraints": [
+    "Bootstrap admin assignment must be stored in stable variables so it survives upgrades",
+    "Do not remove or weaken existing role-based access control for non-bootstrap scenarios",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useActor.ts"
+  ],
+  "nonGoals": [
+    "Adding a UI flow for manually assigning or revoking admin roles",
+    "Supporting multiple admin bootstrap users",
+    "Changing the Stripe integration or any other backend endpoints"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

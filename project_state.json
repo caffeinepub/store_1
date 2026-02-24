@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Project with admin login functionality. Fixing first-user admin bootstrap issue where the first user to log in is automatically assigned permanent admin rights.",
+  "architectural_notes": [
+    "First-user admin bootstrap: the first user to authenticate should be automatically assigned permanent admin rights"
+  ],
+  "known_issues": [
+    "Access denied immediately on first admin login after deployment — no admin assigned yet (bootstrap issue)"
+  ],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-update-the-frontend-admindashboardpage-so-that-after-a-successful-internet-identity-login-the-admin-check-is-re-evaluated-immediately-and-the-user-is-shown-the-admin-dashboard-without-receiving-an-access-denied-message-when-they-are-the-bootstrapped-first-admin",
+      "title": "Update the frontend `AdminDashboardPage` so that after a successful Internet Identity login, the admin check is re-evaluated immediately and the user is shown the admin dashboard without receiving an 'access denied' message when they are the bootstrapped first admin.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Fix admin bootstrap: first user to log in is automatically and permanently assigned admin rights",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Update the backend admin initialization logic so that if no admin has been assigned yet (i.e., the admin list is empty), the first caller to invoke `isCallerAdmin` or any admin-gated function is automatically and permanently stored as an admin. This bootstrap assignment must persist across canister upgrades.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Streetwear Store",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

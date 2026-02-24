@@ -1,0 +1,28 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Fix admin bootstrap: first login user auto-assigned permanent admin rights",
+  "requirements": [
+    {
+      "id": "REQ-2",
+      "summary": "Update AdminDashboardPage to re-evaluate admin check immediately after Internet Identity login so the bootstrapped first admin sees the dashboard without an access denied message",
+      "acceptanceCriteria": [
+        "After logging in as the first user (bootstrap admin), the admin dashboard grid is displayed without an access denied message",
+        "The `useAdminCheck` hook result is refreshed after authentication so stale denial state is not shown",
+        "If the user is genuinely not an admin, the access denied message is still shown correctly"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useAdminCheck.ts",
+          "operation": "modify",
+          "description": "Modify the useAdminCheck hook to refetch the admin status when the actor changes or becomes available. Add logic to invalidate and refetch the 'isCallerAdmin' query when the identity transitions from unauthenticated to authenticated, ensuring that the admin check runs immediately after login completes and the actor is ready."
+        },
+        {
+          "path": "frontend/src/pages/AdminDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Update AdminDashboardPage to correctly handle the admin check lifecycle. Ensure that when a user logs in, the page waits for the admin check to complete before showing either the dashboard grid or the access denied message. Remove any stale denial state that might display before the post-login admin check completes. The page should show a loading state while authentication and admin verification are in progress, then display the appropriate content based on the refreshed admin status."
+        }
+      ]
+    }
+  ]
+}

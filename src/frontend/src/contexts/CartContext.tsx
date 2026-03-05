@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { ExternalBlob } from "../backend";
 import type { Color, Product, Size } from "../backend";
 
 export interface CartItem {
@@ -36,16 +37,31 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-function bigintReplacer(_key: string, value: unknown) {
+function cartReplacer(_key: string, value: unknown) {
   if (typeof value === "bigint") {
     return { __bigint__: value.toString() };
+  }
+  // Serialize ExternalBlob instances as a plain object with the URL
+  if (
+    value &&
+    typeof value === "object" &&
+    typeof (value as ExternalBlob).getDirectURL === "function"
+  ) {
+    return { __externalBlob__: (value as ExternalBlob).getDirectURL() };
   }
   return value;
 }
 
-function bigintReviver(_key: string, value: unknown) {
-  if (value && typeof value === "object" && "__bigint__" in (value as object)) {
-    return BigInt((value as { __bigint__: string }).__bigint__);
+function cartReviver(_key: string, value: unknown) {
+  if (value && typeof value === "object") {
+    if ("__bigint__" in (value as object)) {
+      return BigInt((value as { __bigint__: string }).__bigint__);
+    }
+    if ("__externalBlob__" in (value as object)) {
+      return ExternalBlob.fromURL(
+        (value as { __externalBlob__: string }).__externalBlob__,
+      );
+    }
   }
   return value;
 }
@@ -54,7 +70,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem("cart");
-      return saved ? JSON.parse(saved, bigintReviver) : [];
+      return saved ? JSON.parse(saved, cartReviver) : [];
     } catch {
       return [];
     }
@@ -62,7 +78,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem("cart", JSON.stringify(items, bigintReplacer));
+      localStorage.setItem("cart", JSON.stringify(items, cartReplacer));
     } catch (error) {
       console.error("Failed to save cart to localStorage:", error);
     }

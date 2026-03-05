@@ -1,14 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
-import type { HeroSection } from '../backend';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { HeroSection } from "../backend";
+import { useActor } from "./useActor";
 
 export function useGetHeroSection() {
   const { actor, isFetching: actorFetching } = useActor();
 
   return useQuery<HeroSection | null>({
-    queryKey: ['heroSection'],
+    queryKey: ["heroSection"],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.getHeroSection();
     },
     enabled: !!actor && !actorFetching,
@@ -21,11 +21,11 @@ export function useSetHeroSection() {
 
   return useMutation({
     mutationFn: async (section: HeroSection) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.setHeroSection(section);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['heroSection'] });
+      queryClient.invalidateQueries({ queryKey: ["heroSection"] });
     },
   });
 }

@@ -1,5 +1,5 @@
-import { useGetContactForms } from '../hooks/useContactForm';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useGetContactForms } from "../hooks/useContactForm";
 
 export default function AdminContactFormsPage() {
   const { data: forms = [], isLoading } = useGetContactForms();
@@ -24,8 +24,8 @@ export default function AdminContactFormsPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {forms.map((form, index) => (
-            <Card key={index}>
+          {forms.map((form) => (
+            <Card key={form.timestamp.toString()}>
               <CardHeader>
                 <CardTitle className="text-lg">{form.name}</CardTitle>
                 <p className="text-sm text-muted-foreground">{form.email}</p>

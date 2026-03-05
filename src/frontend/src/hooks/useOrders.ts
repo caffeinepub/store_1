@@ -1,12 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
-import type { Order, Product, Address, ShippingOption } from '../backend';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Address, Order, Product, ShippingOption } from "../backend";
+import { useActor } from "./useActor";
 
 export function useGetAllOrders() {
   const { actor, isFetching } = useActor();
 
   return useQuery<Order[]>({
-    queryKey: ['allOrders'],
+    queryKey: ["allOrders"],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getAllOrders();
@@ -19,7 +19,7 @@ export function useGetOrder(orderId: string) {
   const { actor, isFetching } = useActor();
 
   return useQuery<Order | null>({
-    queryKey: ['order', orderId],
+    queryKey: ["order", orderId],
     queryFn: async () => {
       if (!actor) return null;
       return actor.getOrder(orderId);
@@ -44,11 +44,16 @@ export function useCreateOrder() {
       shippingAddress: Address;
       shippingOption: ShippingOption;
     }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.createOrder(products, total, shippingAddress, shippingOption);
+      if (!actor) throw new Error("Actor not available");
+      return actor.createOrder(
+        products,
+        total,
+        shippingAddress,
+        shippingOption,
+      );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allOrders'] });
+      queryClient.invalidateQueries({ queryKey: ["allOrders"] });
     },
   });
 }
@@ -58,12 +63,16 @@ export function useUpdateOrderStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ orderId, status }: { orderId: string; status: string }) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async ({
+      orderId,
+      status,
+    }: { orderId: string; status: string }) => {
+      if (!actor) throw new Error("Actor not available");
       return actor.updateOrderStatus(orderId, status);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allOrders'] });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["allOrders"] });
+      queryClient.invalidateQueries({ queryKey: ["order", variables.orderId] });
     },
   });
 }
@@ -73,12 +82,16 @@ export function useUpdateOrderCost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ orderId, cost }: { orderId: string; cost: bigint }) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async ({
+      orderId,
+      cost,
+    }: { orderId: string; cost: bigint }) => {
+      if (!actor) throw new Error("Actor not available");
       return actor.updateOrderCost(orderId, cost);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allOrders'] });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["allOrders"] });
+      queryClient.invalidateQueries({ queryKey: ["order", variables.orderId] });
     },
   });
 }

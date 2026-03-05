@@ -1,12 +1,12 @@
-import { useEffect } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCart } from '../contexts/CartContext';
-import { useCreateCheckoutSession } from '../hooks/useStripeCheckout';
-import type { ShoppingItem } from '../backend';
-import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "@tanstack/react-router";
+import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import { toast } from "sonner";
+import type { ShoppingItem } from "../backend";
+import { useCart } from "../contexts/CartContext";
+import { useCreateCheckoutSession } from "../hooks/useStripeCheckout";
 
 export default function PaymentPage() {
   const navigate = useNavigate();
@@ -14,44 +14,49 @@ export default function PaymentPage() {
   const createCheckoutSession = useCreateCheckoutSession();
 
   useEffect(() => {
-    const checkoutData = sessionStorage.getItem('checkoutData');
+    const checkoutData = sessionStorage.getItem("checkoutData");
     if (!checkoutData || items.length === 0) {
-      toast.error('No checkout data found');
-      navigate({ to: '/cart' });
+      toast.error("No checkout data found");
+      navigate({ to: "/cart" });
     }
   }, [items, navigate]);
 
   const handlePayment = async () => {
     try {
-      const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData') || '{}');
-      
+      const checkoutData = JSON.parse(
+        sessionStorage.getItem("checkoutData") || "{}",
+      );
+
       const shoppingItems: ShoppingItem[] = items.map((item) => ({
         productName: item.product.name,
         productDescription: `${item.product.description} - Size: ${item.size}, Color: ${item.color}`,
         priceInCents: item.product.price,
         quantity: BigInt(item.quantity),
-        currency: 'USD',
+        currency: "USD",
       }));
 
       // Add shipping as a line item
       shoppingItems.push({
-        productName: 'Shipping',
+        productName: "Shipping",
         productDescription: `${checkoutData.shipping.name} (${checkoutData.shipping.days})`,
-        priceInCents: BigInt(checkoutData.shipping.basePrice + checkoutData.shipping.itemPrice * (items.length - 1)),
+        priceInCents: BigInt(
+          checkoutData.shipping.basePrice +
+            checkoutData.shipping.itemPrice * (items.length - 1),
+        ),
         quantity: BigInt(1),
-        currency: 'USD',
+        currency: "USD",
       });
 
       const session = await createCheckoutSession.mutateAsync(shoppingItems);
-      
+
       if (!session?.url) {
-        throw new Error('Stripe session missing url');
+        throw new Error("Stripe session missing url");
       }
 
       window.location.href = session.url;
     } catch (error: any) {
-      console.error('Payment error:', error);
-      toast.error(error.message || 'Failed to initiate payment');
+      console.error("Payment error:", error);
+      toast.error(error.message || "Failed to initiate payment");
     }
   };
 
@@ -78,7 +83,7 @@ export default function PaymentPage() {
                   Processing...
                 </>
               ) : (
-                'Pay with Stripe'
+                "Pay with Stripe"
               )}
             </Button>
           </CardContent>

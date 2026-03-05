@@ -1,11 +1,17 @@
-import { useGetAllOrders } from '../hooks/useOrders';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useGetAllOrders } from "../hooks/useOrders";
 
 export default function AdminAnalyticsPage() {
   const { data: orders = [] } = useGetAllOrders();
 
-  const totalRevenue = orders.reduce((sum, order) => sum + Number(order.total), 0);
-  const totalCosts = orders.reduce((sum, order) => sum + Number(order.printifyCost || 0), 0);
+  const totalRevenue = orders.reduce(
+    (sum, order) => sum + Number(order.total),
+    0,
+  );
+  const totalCosts = orders.reduce(
+    (sum, order) => sum + Number(order.printifyCost || 0),
+    0,
+  );
   const profit = totalRevenue - totalCosts;
 
   return (
@@ -18,7 +24,9 @@ export default function AdminAnalyticsPage() {
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-primary">${(totalRevenue / 100).toFixed(2)}</p>
+            <p className="text-2xl font-bold text-primary">
+              ${(totalRevenue / 100).toFixed(2)}
+            </p>
           </CardContent>
         </Card>
 
@@ -27,7 +35,9 @@ export default function AdminAnalyticsPage() {
             <CardTitle className="text-sm font-medium">Total Costs</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">${(totalCosts / 100).toFixed(2)}</p>
+            <p className="text-2xl font-bold">
+              ${(totalCosts / 100).toFixed(2)}
+            </p>
           </CardContent>
         </Card>
 
@@ -36,7 +46,9 @@ export default function AdminAnalyticsPage() {
             <CardTitle className="text-sm font-medium">Profit</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-500">${(profit / 100).toFixed(2)}</p>
+            <p className="text-2xl font-bold text-green-500">
+              ${(profit / 100).toFixed(2)}
+            </p>
           </CardContent>
         </Card>
       </div>

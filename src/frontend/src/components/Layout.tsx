@@ -1,7 +1,7 @@
-import { Outlet } from '@tanstack/react-router';
-import Header from './Header';
-import Footer from './Footer';
-import { CartProvider } from '../contexts/CartContext';
+import { Outlet } from "@tanstack/react-router";
+import { CartProvider } from "../contexts/CartContext";
+import Footer from "./Footer";
+import Header from "./Header";
 
 export default function Layout() {
   return (

@@ -12,9 +12,9 @@ import List "mo:core/List";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import OutCall "http-outcalls/outcall";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+
 actor {
   include MixinStorage();
   let accessControlState = AccessControl.initState();
@@ -31,6 +31,7 @@ actor {
     #XXXXL;
     #XXXXXL;
   };
+
   public type Color = Text;
 
   public type Product = {
@@ -43,11 +44,14 @@ actor {
     colors : [Color];
     categoryId : Text;
     weight : Nat;
+    order : Nat;
+    featured : Bool;
   };
 
   public type Category = {
     id : Text;
     name : Text;
+    description : Text;
     order : Nat;
   };
 
@@ -55,6 +59,15 @@ actor {
     name : Text;
     basePrice : Nat;
     itemPrice : Nat;
+  };
+
+  public type ShippingRates = {
+    usStandard : Nat;
+    usExpress : Nat;
+    usOvernight : Nat;
+    canada : Nat;
+    australia : Nat;
+    restOfWorld : Nat;
   };
 
   public type Address = {
@@ -85,7 +98,6 @@ actor {
     timestamp : Int;
   };
 
-  // New types for hero section and social links
   public type HeroSection = {
     image : ?Storage.ExternalBlob;
     headline : Text;
@@ -100,14 +112,57 @@ actor {
     kick : Text;
   };
 
+  public type UserProfile = {
+    name : Text;
+    email : Text;
+  };
+
+  public type NewsletterSubscriber = {
+    email : Text;
+    signupDate : Int;
+  };
+
   // Storage
   let products = Map.empty<Text, Product>();
   let categories = Map.empty<Text, Category>();
   let orders = Map.empty<Text, Order>();
   let contactForms = Map.empty<Text, ContactForm>();
+  let userProfiles = Map.empty<Principal, UserProfile>();
+  let newsletterSubscribers = Map.empty<Text, NewsletterSubscriber>();
 
   var heroSection : ?HeroSection = null;
   var socialLinks : ?SocialLinks = null;
+
+  var shippingRates : ShippingRates = {
+    usStandard = 0;
+    usExpress = 0;
+    usOvernight = 0;
+    canada = 0;
+    australia = 0;
+    restOfWorld = 0;
+  };
+
+  // User profile endpoints - accessible by any authenticated (non-anonymous) user
+  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access profiles");
+    };
+    userProfiles.get(caller);
+  };
+
+  public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own profile");
+    };
+    userProfiles.get(user);
+  };
+
+  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can save profiles");
+    };
+    userProfiles.add(caller, profile);
+  };
 
   // Categories
   public shared ({ caller }) func addCategory(category : Category) : async () {
@@ -129,6 +184,27 @@ actor {
       Runtime.trap("Unauthorized: Only admins can delete categories");
     };
     categories.remove(id);
+  };
+
+  public shared ({ caller }) func reorderCategories(orderedIds : [Text]) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can reorder categories");
+    };
+
+    for ((index, id) in orderedIds.enumerate()) {
+      switch (categories.get(id)) {
+        case (?category) {
+          let updatedCategory : Category = {
+            id = category.id;
+            name = category.name;
+            description = category.description;
+            order = index;
+          };
+          categories.add(id, updatedCategory);
+        };
+        case (null) { Runtime.trap("Category not found: " # id) };
+      };
+    };
   };
 
   public query func getCategories() : async [Category] {
@@ -157,12 +233,66 @@ actor {
     products.remove(id);
   };
 
+  public shared ({ caller }) func reorderProducts(orderedIds : [Text]) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can reorder products");
+    };
+
+    for ((index, id) in orderedIds.enumerate()) {
+      switch (products.get(id)) {
+        case (?product) {
+          let updatedProduct : Product = {
+            id = product.id;
+            name = product.name;
+            description = product.description;
+            price = product.price;
+            images = product.images;
+            sizes = product.sizes;
+            colors = product.colors;
+            categoryId = product.categoryId;
+            weight = product.weight;
+            order = index;
+            featured = product.featured; // Preserve featured flag when reordering
+          };
+          products.add(id, updatedProduct);
+        };
+        case (null) { Runtime.trap("Product not found: " # id) };
+      };
+    };
+  };
+
+  public shared ({ caller }) func setProductFeatured(id : Text, featured : Bool) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can set product as featured");
+    };
+
+    switch (products.get(id)) {
+      case (?product) {
+        let updatedProduct : Product = {
+          id = product.id;
+          name = product.name;
+          description = product.description;
+          price = product.price;
+          images = product.images;
+          sizes = product.sizes;
+          colors = product.colors;
+          categoryId = product.categoryId;
+          weight = product.weight;
+          order = product.order;
+          featured;
+        };
+        products.add(id, updatedProduct);
+      };
+      case (null) { Runtime.trap("Product not found") };
+    };
+  };
+
   public query func getProducts() : async [Product] {
     products.values().toArray();
   };
 
-  public shared func calculateShipping(destination : Text, productList : [Product]) : async Nat {
-    let weight = productList.foldLeft(0, func(acc, p) { acc + p.weight });
+  public query func calculateShipping(destination : Text, productList : [Product]) : async Nat {
+    let _weight = productList.foldLeft(0, func(acc, p) { acc + p.weight });
 
     let shipping : Nat = switch (destination) {
       case ("US") { 399 + productList.size() * 209 };
@@ -174,10 +304,12 @@ actor {
     shipping;
   };
 
-  // Orders
+  // Orders - any caller including guests can create an order
   public shared ({ caller }) func createOrder(productList : [Product], total : Nat, shippingAddress : Address, shippingOption : ShippingOption) : async ?Order {
+    let orderId = "ORDER-" # (orders.size() + 1001).toText();
+
     let order : Order = {
-      id = "ORDER-" # (orders.size() + 1).toText();
+      id = orderId;
       userId = caller;
       products = productList;
       total;
@@ -187,7 +319,7 @@ actor {
       timestamp = Time.now();
       printifyCost = null;
     };
-    orders.add(order.id, order);
+    orders.add(orderId, order);
     ?order;
   };
 
@@ -242,7 +374,17 @@ actor {
   public query ({ caller }) func getOrder(id : Text) : async ?Order {
     switch (orders.get(id)) {
       case (?order) {
-        if (order.userId == caller or AccessControl.isAdmin(accessControlState, caller)) {
+        // Admins can view any order
+        if (AccessControl.isAdmin(accessControlState, caller)) {
+          return ?order;
+        };
+
+        // For non-admin callers, check ownership
+        // Note: If both caller and order.userId are anonymous (2vxsx-fae),
+        // this allows any anonymous user to view orders created by anonymous users.
+        // This is a known limitation when allowing guest checkout.
+        // A more secure approach would require session tokens or order access codes.
+        if (order.userId == caller) {
           ?order;
         } else {
           Runtime.trap("Unauthorized: Can only view your own orders");
@@ -259,7 +401,7 @@ actor {
     orders.values().toArray();
   };
 
-  // Contact Forms
+  // Contact Forms - Public endpoint for website visitors
   public shared func submitContactForm(form : ContactForm) : async () {
     contactForms.add(form.timestamp.toText(), form);
   };
@@ -296,17 +438,19 @@ actor {
     OutCall.transform(input);
   };
 
+  // Allows both authenticated users and guests to checkout
   public shared ({ caller }) func createCheckoutSession(items : [Stripe.ShoppingItem], successUrl : Text, cancelUrl : Text) : async Text {
     await Stripe.createCheckoutSession(getStripeConfiguration(), caller, items, successUrl, cancelUrl, transform);
   };
 
+  // Allows both authenticated users and guests to check session status
   public shared ({ caller }) func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
     await Stripe.getSessionStatus(getStripeConfiguration(), sessionId, transform);
   };
 
-  // New admin-only endpoints for hero section and social links
+  // Hero Section and Social Links
   public shared ({ caller }) func setHeroSection(section : HeroSection) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can update the hero section");
     };
     heroSection := ?section;
@@ -317,7 +461,7 @@ actor {
   };
 
   public shared ({ caller }) func setSocialLinks(links : SocialLinks) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can update social links");
     };
     socialLinks := ?links;
@@ -327,7 +471,34 @@ actor {
     socialLinks;
   };
 
-  public query ({ caller }) func isAdmin() : async Bool {
-    AccessControl.isAdmin(accessControlState, caller);
+  // Newsletter Subscribers - Public endpoint for website visitors
+  public shared func subscribeToNewsletter(email : Text) : async () {
+    if (newsletterSubscribers.get(email) != null) {
+      Runtime.trap("Email already subscribed");
+    };
+    let subscriber : NewsletterSubscriber = {
+      email;
+      signupDate = Time.now();
+    };
+    newsletterSubscribers.add(email, subscriber);
+  };
+
+  public query ({ caller }) func getNewsletterSubscribers() : async [NewsletterSubscriber] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view newsletters");
+    };
+    newsletterSubscribers.values().toArray();
+  };
+
+  // Shipping Rates/Admin Config
+  public shared ({ caller }) func setShippingRates(rates : ShippingRates) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can set shipping rates");
+    };
+    shippingRates := rates;
+  };
+
+  public query func getShippingRates() : async ShippingRates {
+    shippingRates;
   };
 };

@@ -1,41 +1,83 @@
-import { useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCart } from '../contexts/CartContext';
-import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useCart } from "../contexts/CartContext";
 
 const countries = [
-  { value: 'US', label: 'United States' },
-  { value: 'Canada', label: 'Canada' },
-  { value: 'Australia', label: 'Australia' },
-  { value: 'Other', label: 'Other' },
+  { value: "US", label: "United States" },
+  { value: "Canada", label: "Canada" },
+  { value: "Australia", label: "Australia" },
+  { value: "Other", label: "Other" },
 ];
 
 const shippingOptions = {
   US: [
-    { name: 'Economy', basePrice: 399, itemPrice: 209, days: '4-8 business days' },
-    { name: 'Standard', basePrice: 475, itemPrice: 240, days: '2-5 business days' },
-    { name: 'Express', basePrice: 799, itemPrice: 240, days: '2-3 business days' },
+    {
+      name: "Economy",
+      basePrice: 399,
+      itemPrice: 209,
+      days: "4-8 business days",
+    },
+    {
+      name: "Standard",
+      basePrice: 475,
+      itemPrice: 240,
+      days: "2-5 business days",
+    },
+    {
+      name: "Express",
+      basePrice: 799,
+      itemPrice: 240,
+      days: "2-3 business days",
+    },
   ],
-  Canada: [{ name: 'Standard', basePrice: 939, itemPrice: 439, days: '10-30 business days' }],
-  Australia: [{ name: 'Standard', basePrice: 1249, itemPrice: 499, days: '10-30 business days' }],
-  Other: [{ name: 'Standard', basePrice: 1000, itemPrice: 400, days: '10-30 business days' }],
+  Canada: [
+    {
+      name: "Standard",
+      basePrice: 939,
+      itemPrice: 439,
+      days: "10-30 business days",
+    },
+  ],
+  Australia: [
+    {
+      name: "Standard",
+      basePrice: 1249,
+      itemPrice: 499,
+      days: "10-30 business days",
+    },
+  ],
+  Other: [
+    {
+      name: "Standard",
+      basePrice: 1000,
+      itemPrice: 400,
+      days: "10-30 business days",
+    },
+  ],
 };
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { items, getCartTotal } = useCart();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [street, setStreet] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [zip, setZip] = useState('');
-  const [country, setCountry] = useState('US');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [street, setStreet] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zip, setZip] = useState("");
+  const [country, setCountry] = useState("US");
   const [selectedShipping, setSelectedShipping] = useState(0);
 
   if (items.length === 0) {
@@ -48,9 +90,12 @@ export default function CheckoutPage() {
     );
   }
 
-  const availableShipping = shippingOptions[country as keyof typeof shippingOptions] || shippingOptions.Other;
+  const availableShipping =
+    shippingOptions[country as keyof typeof shippingOptions] ||
+    shippingOptions.Other;
   const shipping = availableShipping[selectedShipping];
-  const shippingCost = shipping.basePrice + shipping.itemPrice * (items.length - 1);
+  const shippingCost =
+    shipping.basePrice + shipping.itemPrice * (items.length - 1);
   const subtotal = getCartTotal();
   const total = subtotal + shippingCost;
 
@@ -58,21 +103,21 @@ export default function CheckoutPage() {
     e.preventDefault();
 
     if (!name || !email || !street || !city || !state || !zip || !country) {
-      toast.error('Please fill in all required fields');
+      toast.error("Please fill in all required fields");
       return;
     }
 
     // Store checkout data in sessionStorage for payment page
     sessionStorage.setItem(
-      'checkoutData',
+      "checkoutData",
       JSON.stringify({
         address: { name, street, city, state, zip, country },
         shipping,
         total,
-      })
+      }),
     );
 
-    navigate({ to: '/payment' });
+    navigate({ to: "/payment" });
   };
 
   return (
@@ -174,9 +219,11 @@ export default function CheckoutPage() {
               <CardContent className="space-y-2">
                 {availableShipping.map((option, index) => (
                   <label
-                    key={index}
+                    key={option.name}
                     className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors ${
-                      selectedShipping === index ? 'border-primary bg-accent' : 'border-border'
+                      selectedShipping === index
+                        ? "border-primary bg-accent"
+                        : "border-border"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -189,11 +236,18 @@ export default function CheckoutPage() {
                       />
                       <div>
                         <p className="font-medium">{option.name}</p>
-                        <p className="text-sm text-muted-foreground">{option.days}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {option.days}
+                        </p>
                       </div>
                     </div>
                     <p className="font-medium">
-                      ${((option.basePrice + option.itemPrice * (items.length - 1)) / 100).toFixed(2)}
+                      $
+                      {(
+                        (option.basePrice +
+                          option.itemPrice * (items.length - 1)) /
+                        100
+                      ).toFixed(2)}
                     </p>
                   </label>
                 ))}
@@ -216,7 +270,13 @@ export default function CheckoutPage() {
                       <span className="text-muted-foreground">
                         {item.product.name} x{item.quantity}
                       </span>
-                      <span>${((Number(item.product.price) * item.quantity) / 100).toFixed(2)}</span>
+                      <span>
+                        $
+                        {(
+                          (Number(item.product.price) * item.quantity) /
+                          100
+                        ).toFixed(2)}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -235,7 +295,9 @@ export default function CheckoutPage() {
                 <div className="border-t pt-4">
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span className="text-primary">${(total / 100).toFixed(2)}</span>
+                    <span className="text-primary">
+                      ${(total / 100).toFixed(2)}
+                    </span>
                   </div>
                 </div>
 

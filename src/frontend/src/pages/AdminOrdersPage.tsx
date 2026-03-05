@@ -1,17 +1,27 @@
-import { useGetAllOrders } from '../hooks/useOrders';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "@tanstack/react-router";
+import { Eye, Loader2 } from "lucide-react";
+import { useGetAllOrders } from "../hooks/useOrders";
 
 export default function AdminOrdersPage() {
   const { data: orders = [], isLoading } = useGetAllOrders();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
       <div className="container py-12">
-        <p className="text-center text-muted-foreground">Loading orders...</p>
+        <div className="flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
       </div>
     );
   }
+
+  const sortedOrders = [...orders].sort(
+    (a, b) => Number(b.timestamp) - Number(a.timestamp),
+  );
 
   return (
     <div className="container py-12">
@@ -25,7 +35,7 @@ export default function AdminOrdersPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {orders.map((order) => (
+          {sortedOrders.map((order) => (
             <Card key={order.id}>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -34,24 +44,43 @@ export default function AdminOrdersPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
                   <div>
                     <p className="text-muted-foreground">Customer</p>
-                    <p>{order.shippingAddress.name}</p>
+                    <p className="font-medium">{order.shippingAddress.name}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Total</p>
-                    <p className="font-medium">${(Number(order.total) / 100).toFixed(2)}</p>
+                    <p className="font-medium">
+                      ${(Number(order.total) / 100).toFixed(2)}
+                    </p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Date</p>
-                    <p>{new Date(Number(order.timestamp) / 1000000).toLocaleDateString()}</p>
+                    <p>
+                      {new Date(
+                        Number(order.timestamp) / 1000000,
+                      ).toLocaleDateString()}
+                    </p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Items</p>
                     <p>{order.products.length}</p>
                   </div>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    navigate({
+                      to: "/admin/orders/$orderId",
+                      params: { orderId: order.id },
+                    })
+                  }
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Details
+                </Button>
               </CardContent>
             </Card>
           ))}

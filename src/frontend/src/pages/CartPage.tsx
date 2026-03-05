@@ -1,8 +1,8 @@
-import { Link } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { useCart } from '../contexts/CartContext';
-import { Trash2, Plus, Minus } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "@tanstack/react-router";
+import { Minus, Plus, Trash2 } from "lucide-react";
+import { useCart } from "../contexts/CartContext";
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, getCartTotal } = useCart();
@@ -12,7 +12,9 @@ export default function CartPage() {
       <div className="container py-12">
         <div className="text-center space-y-4">
           <h1 className="text-3xl font-bold">Your Cart is Empty</h1>
-          <p className="text-muted-foreground">Add some items to get started!</p>
+          <p className="text-muted-foreground">
+            Add some items to get started!
+          </p>
           <Link to="/shop">
             <Button>Continue Shopping</Button>
           </Link>
@@ -59,7 +61,9 @@ export default function CartPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => removeFromCart(item.product.id, item.size, item.color)}
+                      onClick={() =>
+                        removeFromCart(item.product.id, item.size, item.color)
+                      }
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -70,7 +74,12 @@ export default function CartPage() {
                         size="icon"
                         className="h-8 w-8"
                         onClick={() =>
-                          updateQuantity(item.product.id, item.size, item.color, item.quantity - 1)
+                          updateQuantity(
+                            item.product.id,
+                            item.size,
+                            item.color,
+                            item.quantity - 1,
+                          )
                         }
                       >
                         <Minus className="h-3 w-3" />
@@ -81,7 +90,12 @@ export default function CartPage() {
                         size="icon"
                         className="h-8 w-8"
                         onClick={() =>
-                          updateQuantity(item.product.id, item.size, item.color, item.quantity + 1)
+                          updateQuantity(
+                            item.product.id,
+                            item.size,
+                            item.color,
+                            item.quantity + 1,
+                          )
                         }
                       >
                         <Plus className="h-3 w-3" />
@@ -101,7 +115,9 @@ export default function CartPage() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">${(getCartTotal() / 100).toFixed(2)}</span>
+                  <span className="font-medium">
+                    ${(getCartTotal() / 100).toFixed(2)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>Shipping</span>
@@ -111,7 +127,9 @@ export default function CartPage() {
               <div className="border-t pt-4">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span className="text-primary">${(getCartTotal() / 100).toFixed(2)}</span>
+                  <span className="text-primary">
+                    ${(getCartTotal() / 100).toFixed(2)}
+                  </span>
                 </div>
               </div>
               <Link to="/checkout">

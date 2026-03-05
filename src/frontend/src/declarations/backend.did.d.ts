@@ -18,7 +18,12 @@ export interface Address {
   'name' : string,
   'state' : string,
 }
-export interface Category { 'id' : string, 'order' : bigint, 'name' : string }
+export interface Category {
+  'id' : string,
+  'order' : bigint,
+  'name' : string,
+  'description' : string,
+}
 export type Color = string;
 export interface ContactForm {
   'name' : string,
@@ -31,6 +36,10 @@ export interface HeroSection {
   'tagline' : string,
   'headline' : string,
   'image' : [] | [ExternalBlob],
+}
+export interface NewsletterSubscriber {
+  'signupDate' : bigint,
+  'email' : string,
 }
 export interface Order {
   'id' : string,
@@ -47,6 +56,8 @@ export interface Product {
   'id' : string,
   'categoryId' : string,
   'weight' : bigint,
+  'featured' : boolean,
+  'order' : bigint,
   'name' : string,
   'description' : string,
   'sizes' : Array<Size>,
@@ -58,6 +69,14 @@ export interface ShippingOption {
   'name' : string,
   'itemPrice' : bigint,
   'basePrice' : bigint,
+}
+export interface ShippingRates {
+  'australia' : bigint,
+  'usExpress' : bigint,
+  'usOvernight' : bigint,
+  'usStandard' : bigint,
+  'canada' : bigint,
+  'restOfWorld' : bigint,
 }
 export interface ShoppingItem {
   'productName' : string,
@@ -98,6 +117,7 @@ export interface TransformationOutput {
   'body' : Uint8Array,
   'headers' : Array<http_header>,
 }
+export interface UserProfile { 'name' : string, 'email' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
@@ -150,21 +170,30 @@ export interface _SERVICE {
   'deleteCategory' : ActorMethod<[string], undefined>,
   'deleteProduct' : ActorMethod<[string], undefined>,
   'getAllOrders' : ActorMethod<[], Array<Order>>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCategories' : ActorMethod<[], Array<Category>>,
   'getContactForms' : ActorMethod<[], Array<ContactForm>>,
   'getHeroSection' : ActorMethod<[], [] | [HeroSection]>,
+  'getNewsletterSubscribers' : ActorMethod<[], Array<NewsletterSubscriber>>,
   'getOrder' : ActorMethod<[string], [] | [Order]>,
   'getProducts' : ActorMethod<[], Array<Product>>,
+  'getShippingRates' : ActorMethod<[], ShippingRates>,
   'getSocialLinks' : ActorMethod<[], [] | [SocialLinks]>,
   'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
-  'isAdmin' : ActorMethod<[], boolean>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isStripeConfigured' : ActorMethod<[], boolean>,
+  'reorderCategories' : ActorMethod<[Array<string>], undefined>,
+  'reorderProducts' : ActorMethod<[Array<string>], undefined>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'setHeroSection' : ActorMethod<[HeroSection], undefined>,
+  'setProductFeatured' : ActorMethod<[string, boolean], undefined>,
+  'setShippingRates' : ActorMethod<[ShippingRates], undefined>,
   'setSocialLinks' : ActorMethod<[SocialLinks], undefined>,
   'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
   'submitContactForm' : ActorMethod<[ContactForm], undefined>,
+  'subscribeToNewsletter' : ActorMethod<[string], undefined>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
   'updateCategory' : ActorMethod<[Category], undefined>,
   'updateOrderCost' : ActorMethod<[string, bigint], undefined>,

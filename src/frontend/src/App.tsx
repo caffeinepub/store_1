@@ -1,29 +1,35 @@
-import { RouterProvider, createRouter, createRoute, createRootRoute } from '@tanstack/react-router';
-import { ThemeProvider } from 'next-themes';
-import { Toaster } from '@/components/ui/sonner';
-import Layout from './components/Layout';
-import HomePage from './pages/HomePage';
-import ShopPage from './pages/ShopPage';
-import ProductDetailPage from './pages/ProductDetailPage';
-import ContactPage from './pages/ContactPage';
-import CartPage from './pages/CartPage';
-import CheckoutPage from './pages/CheckoutPage';
-import PaymentPage from './pages/PaymentPage';
-import PaymentSuccessPage from './pages/PaymentSuccessPage';
-import PaymentFailurePage from './pages/PaymentFailurePage';
-import AdminDashboardPage from './pages/AdminDashboardPage';
-import AdminProductsPage from './pages/AdminProductsPage';
-import AdminCategoriesPage from './pages/AdminCategoriesPage';
-import AdminOrdersPage from './pages/AdminOrdersPage';
-import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
-import AdminNewsletterPage from './pages/AdminNewsletterPage';
-import AdminContactFormsPage from './pages/AdminContactFormsPage';
-import AdminHeroSectionPage from './pages/AdminHeroSectionPage';
-import AdminSocialLinksPage from './pages/AdminSocialLinksPage';
-import TermsOfServicePage from './pages/TermsOfServicePage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
-import ShippingReturnsPage from './pages/ShippingReturnsPage';
-import RefundPolicyPage from './pages/RefundPolicyPage';
+import { Toaster } from "@/components/ui/sonner";
+import {
+  RouterProvider,
+  createRootRoute,
+  createRoute,
+  createRouter,
+} from "@tanstack/react-router";
+import { ThemeProvider } from "next-themes";
+import Layout from "./components/Layout";
+import AdminAnalyticsPage from "./pages/AdminAnalyticsPage";
+import AdminCategoriesPage from "./pages/AdminCategoriesPage";
+import AdminContactFormsPage from "./pages/AdminContactFormsPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminHeroSectionPage from "./pages/AdminHeroSectionPage";
+import AdminNewsletterPage from "./pages/AdminNewsletterPage";
+import AdminOrderDetailPage from "./pages/AdminOrderDetailPage";
+import AdminOrdersPage from "./pages/AdminOrdersPage";
+import AdminProductsPage from "./pages/AdminProductsPage";
+import AdminSocialLinksPage from "./pages/AdminSocialLinksPage";
+import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import ContactPage from "./pages/ContactPage";
+import HomePage from "./pages/HomePage";
+import PaymentFailurePage from "./pages/PaymentFailurePage";
+import PaymentPage from "./pages/PaymentPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
+import RefundPolicyPage from "./pages/RefundPolicyPage";
+import ShippingReturnsPage from "./pages/ShippingReturnsPage";
+import ShopPage from "./pages/ShopPage";
+import TermsOfServicePage from "./pages/TermsOfServicePage";
 
 const rootRoute = createRootRoute({
   component: Layout,
@@ -31,133 +37,139 @@ const rootRoute = createRootRoute({
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/',
+  path: "/",
   component: HomePage,
 });
 
 const shopRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/shop',
+  path: "/shop",
   component: ShopPage,
 });
 
 const productRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/product/$productId',
+  path: "/product/$productId",
   component: ProductDetailPage,
 });
 
 const contactRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/contact',
+  path: "/contact",
   component: ContactPage,
 });
 
 const cartRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/cart',
+  path: "/cart",
   component: CartPage,
 });
 
 const checkoutRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/checkout',
+  path: "/checkout",
   component: CheckoutPage,
 });
 
 const paymentRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/payment',
+  path: "/payment",
   component: PaymentPage,
 });
 
 const paymentSuccessRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/payment-success',
+  path: "/payment-success",
   component: PaymentSuccessPage,
 });
 
 const paymentFailureRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/payment-failure',
+  path: "/payment-failure",
   component: PaymentFailurePage,
 });
 
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/admin',
+  path: "/admin",
   component: AdminDashboardPage,
 });
 
 const adminProductsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/admin/products',
+  path: "/admin/products",
   component: AdminProductsPage,
 });
 
 const adminCategoriesRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/admin/categories',
+  path: "/admin/categories",
   component: AdminCategoriesPage,
 });
 
 const adminOrdersRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/admin/orders',
+  path: "/admin/orders",
   component: AdminOrdersPage,
+});
+
+const adminOrderDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/orders/$orderId",
+  component: AdminOrderDetailPage,
 });
 
 const adminAnalyticsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/admin/analytics',
+  path: "/admin/analytics",
   component: AdminAnalyticsPage,
 });
 
 const adminNewsletterRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/admin/newsletter',
+  path: "/admin/newsletter",
   component: AdminNewsletterPage,
 });
 
 const adminContactFormsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/admin/contact-forms',
+  path: "/admin/contact-forms",
   component: AdminContactFormsPage,
 });
 
 const adminHeroSectionRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/admin/hero-section',
+  path: "/admin/hero-section",
   component: AdminHeroSectionPage,
 });
 
 const adminSocialLinksRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/admin/social-links',
+  path: "/admin/social-links",
   component: AdminSocialLinksPage,
 });
 
 const termsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/terms',
+  path: "/terms",
   component: TermsOfServicePage,
 });
 
 const privacyRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/privacy',
+  path: "/privacy",
   component: PrivacyPolicyPage,
 });
 
 const shippingRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/shipping',
+  path: "/shipping",
   component: ShippingReturnsPage,
 });
 
 const refundRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/refund',
+  path: "/refund",
   component: RefundPolicyPage,
 });
 
@@ -175,6 +187,7 @@ const routeTree = rootRoute.addChildren([
   adminProductsRoute,
   adminCategoriesRoute,
   adminOrdersRoute,
+  adminOrderDetailRoute,
   adminAnalyticsRoute,
   adminNewsletterRoute,
   adminContactFormsRoute,
@@ -188,7 +201,7 @@ const routeTree = rootRoute.addChildren([
 
 const router = createRouter({ routeTree });
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
   }

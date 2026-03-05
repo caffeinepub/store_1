@@ -1,23 +1,32 @@
-import { useState } from 'react';
-import { useParams, Link } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { useGetProducts } from '../hooks/useProducts';
-import { useCart } from '../contexts/CartContext';
-import { Size } from '../backend';
-import { toast } from 'sonner';
-import { ArrowLeft, ShoppingCart } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Link, useParams } from "@tanstack/react-router";
+import { ArrowLeft, ShoppingCart } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Size } from "../backend";
+import { useCart } from "../contexts/CartContext";
+import { useGetProducts } from "../hooks/useProducts";
 
-const sizeOptions: Size[] = [Size.S, Size.M, Size.L, Size.XL, Size.XXL, Size.XXXL, Size.XXXXL, Size.XXXXXL];
+const sizeOptions: Size[] = [
+  Size.S,
+  Size.M,
+  Size.L,
+  Size.XL,
+  Size.XXL,
+  Size.XXXL,
+  Size.XXXXL,
+  Size.XXXXXL,
+];
 
 export default function ProductDetailPage() {
-  const { productId } = useParams({ from: '/product/$productId' });
+  const { productId } = useParams({ from: "/product/$productId" });
   const { data: products = [] } = useGetProducts();
   const product = products.find((p) => p.id === productId);
   const { addToCart } = useCart();
 
   const [selectedSize, setSelectedSize] = useState<Size | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string>('');
+  const [selectedColor, setSelectedColor] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -36,21 +45,29 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!selectedSize) {
-      toast.error('Please select a size');
+      toast.error("Please select a size");
       return;
     }
     if (!selectedColor && product.colors.length > 0) {
-      toast.error('Please select a color');
+      toast.error("Please select a color");
       return;
     }
 
-    addToCart(product, selectedSize, selectedColor || product.colors[0], quantity);
-    toast.success('Added to cart!');
+    addToCart(
+      product,
+      selectedSize,
+      selectedColor || product.colors[0],
+      quantity,
+    );
+    toast.success("Added to cart!");
   };
 
   return (
     <div className="container py-12">
-      <Link to="/shop" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-8">
+      <Link
+        to="/shop"
+        className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-8"
+      >
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back to Shop
       </Link>
@@ -75,10 +92,13 @@ export default function ProductDetailPage() {
             <div className="grid grid-cols-4 gap-4">
               {product.images.map((image, index) => (
                 <button
-                  key={index}
+                  type="button"
+                  key={image.getDirectURL()}
                   onClick={() => setCurrentImageIndex(index)}
                   className={`aspect-square overflow-hidden rounded-lg border-2 transition-colors ${
-                    currentImageIndex === index ? 'border-primary' : 'border-transparent'
+                    currentImageIndex === index
+                      ? "border-primary"
+                      : "border-transparent"
                   }`}
                 >
                   <img
@@ -106,14 +126,14 @@ export default function ProductDetailPage() {
           {/* Size Selection */}
           {product.sizes.length > 0 && (
             <div>
-              <label className="text-sm font-medium mb-2 block">Size</label>
+              <p className="text-sm font-medium mb-2 block">Size</p>
               <div className="flex flex-wrap gap-2">
                 {sizeOptions
                   .filter((size) => product.sizes.includes(size))
                   .map((size) => (
                     <Button
                       key={size}
-                      variant={selectedSize === size ? 'default' : 'outline'}
+                      variant={selectedSize === size ? "default" : "outline"}
                       onClick={() => setSelectedSize(size)}
                       className="min-w-[60px]"
                     >
@@ -127,12 +147,12 @@ export default function ProductDetailPage() {
           {/* Color Selection */}
           {product.colors.length > 0 && (
             <div>
-              <label className="text-sm font-medium mb-2 block">Color</label>
+              <p className="text-sm font-medium mb-2 block">Color</p>
               <div className="flex flex-wrap gap-2">
                 {product.colors.map((color) => (
                   <Button
                     key={color}
-                    variant={selectedColor === color ? 'default' : 'outline'}
+                    variant={selectedColor === color ? "default" : "outline"}
                     onClick={() => setSelectedColor(color)}
                   >
                     {color}
@@ -144,7 +164,7 @@ export default function ProductDetailPage() {
 
           {/* Quantity */}
           <div>
-            <label className="text-sm font-medium mb-2 block">Quantity</label>
+            <p className="text-sm font-medium mb-2 block">Quantity</p>
             <div className="flex items-center gap-4">
               <Button
                 variant="outline"
@@ -153,7 +173,9 @@ export default function ProductDetailPage() {
               >
                 -
               </Button>
-              <span className="text-lg font-medium w-12 text-center">{quantity}</span>
+              <span className="text-lg font-medium w-12 text-center">
+                {quantity}
+              </span>
               <Button
                 variant="outline"
                 size="icon"

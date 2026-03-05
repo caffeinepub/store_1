@@ -1,16 +1,16 @@
-import { useEffect } from 'react';
-import { Link } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCart } from '../contexts/CartContext';
-import { CheckCircle } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "@tanstack/react-router";
+import { CheckCircle } from "lucide-react";
+import { useEffect } from "react";
+import { useCart } from "../contexts/CartContext";
 
 export default function PaymentSuccessPage() {
   const { clearCart } = useCart();
 
   useEffect(() => {
     clearCart();
-    sessionStorage.removeItem('checkoutData');
+    sessionStorage.removeItem("checkoutData");
   }, [clearCart]);
 
   return (
@@ -21,14 +21,18 @@ export default function PaymentSuccessPage() {
             <div className="flex justify-center mb-4">
               <CheckCircle className="h-16 w-16 text-green-500" />
             </div>
-            <CardTitle className="text-center text-2xl">Payment Successful!</CardTitle>
+            <CardTitle className="text-center text-2xl">
+              Payment Successful!
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-center">
             <p className="text-muted-foreground">
-              Thank you for your purchase! We've received your order and will process it shortly.
+              Thank you for your purchase! We've received your order and will
+              process it shortly.
             </p>
             <p className="text-sm text-muted-foreground">
-              You'll receive tracking information via email once your order ships.
+              You'll receive tracking information via email once your order
+              ships.
             </p>
             <div className="flex flex-col gap-2 pt-4">
               <Link to="/">

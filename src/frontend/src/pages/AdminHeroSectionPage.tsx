@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useGetHeroSection, useSetHeroSection } from '../hooks/useHeroSection';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Upload, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { ExternalBlob } from '../backend';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useNavigate } from "@tanstack/react-router";
+import { ArrowLeft, Loader2, Upload } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { ExternalBlob } from "../backend";
+import { useGetHeroSection, useSetHeroSection } from "../hooks/useHeroSection";
+import { useInternetIdentity } from "../hooks/useInternetIdentity";
 
 export default function AdminHeroSectionPage() {
   const { identity } = useInternetIdentity();
@@ -17,8 +17,8 @@ export default function AdminHeroSectionPage() {
   const { data: heroSection, isLoading } = useGetHeroSection();
   const setHeroSection = useSetHeroSection();
 
-  const [headline, setHeadline] = useState('');
-  const [tagline, setTagline] = useState('');
+  const [headline, setHeadline] = useState("");
+  const [tagline, setTagline] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -31,8 +31,8 @@ export default function AdminHeroSectionPage() {
         setImagePreview(heroSection.image.getDirectURL());
       }
     } else {
-      setHeadline('STREETWEAR REDEFINED');
-      setTagline('Exclusive drops. Limited editions. Unmatched style.');
+      setHeadline("STREETWEAR REDEFINED");
+      setTagline("Exclusive drops. Limited editions. Unmatched style.");
     }
   }, [heroSection]);
 
@@ -41,8 +41,10 @@ export default function AdminHeroSectionPage() {
       <div className="container py-12">
         <Card className="max-w-md mx-auto">
           <CardContent className="pt-6 text-center space-y-4">
-            <p className="text-muted-foreground">Please log in to access this page</p>
-            <Button onClick={() => navigate({ to: '/' })}>Go to Home</Button>
+            <p className="text-muted-foreground">
+              Please log in to access this page
+            </p>
+            <Button onClick={() => navigate({ to: "/" })}>Go to Home</Button>
           </CardContent>
         </Card>
       </div>
@@ -65,7 +67,7 @@ export default function AdminHeroSectionPage() {
     e.preventDefault();
 
     if (!headline.trim() || !tagline.trim()) {
-      toast.error('Please fill in all fields');
+      toast.error("Please fill in all fields");
       return;
     }
 
@@ -75,9 +77,11 @@ export default function AdminHeroSectionPage() {
       if (imageFile) {
         const arrayBuffer = await imageFile.arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
-        imageBlob = ExternalBlob.fromBytes(uint8Array).withUploadProgress((percentage) => {
-          setUploadProgress(percentage);
-        });
+        imageBlob = ExternalBlob.fromBytes(uint8Array).withUploadProgress(
+          (percentage) => {
+            setUploadProgress(percentage);
+          },
+        );
       }
 
       await setHeroSection.mutateAsync({
@@ -86,11 +90,11 @@ export default function AdminHeroSectionPage() {
         image: imageBlob,
       });
 
-      toast.success('Hero section updated successfully!');
+      toast.success("Hero section updated successfully!");
       setUploadProgress(0);
     } catch (error) {
-      console.error('Failed to update hero section:', error);
-      toast.error('Failed to update hero section');
+      console.error("Failed to update hero section:", error);
+      toast.error("Failed to update hero section");
       setUploadProgress(0);
     }
   };
@@ -107,7 +111,7 @@ export default function AdminHeroSectionPage() {
     <div className="container py-12 max-w-3xl">
       <Button
         variant="ghost"
-        onClick={() => navigate({ to: '/admin' })}
+        onClick={() => navigate({ to: "/admin" })}
         className="mb-6"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -177,14 +181,18 @@ export default function AdminHeroSectionPage() {
               </div>
             )}
 
-            <Button type="submit" disabled={setHeroSection.isPending} className="w-full">
+            <Button
+              type="submit"
+              disabled={setHeroSection.isPending}
+              className="w-full"
+            >
               {setHeroSection.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
                 </>
               ) : (
-                'Save Changes'
+                "Save Changes"
               )}
             </Button>
           </form>

@@ -1,20 +1,27 @@
-import { useMutation } from '@tanstack/react-query';
-import { useActor } from './useActor';
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { NewsletterSubscriber } from "../backend";
+import { useActor } from "./useActor";
 
 export function useNewsletterSignup() {
   const { actor } = useActor();
 
   return useMutation({
     mutationFn: async (email: string) => {
-      if (!actor) throw new Error('Actor not available');
-      // Store newsletter signup - backend would need to add this function
-      // For now, we'll use a workaround with contact form
-      return actor.submitContactForm({
-        name: 'Newsletter Subscriber',
-        email,
-        message: 'Newsletter signup',
-        timestamp: BigInt(Date.now()),
-      });
+      if (!actor) throw new Error("Actor not available");
+      return actor.subscribeToNewsletter(email);
     },
+  });
+}
+
+export function useGetNewsletterSubscribers() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<NewsletterSubscriber[]>({
+    queryKey: ["newsletterSubscribers"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getNewsletterSubscribers();
+    },
+    enabled: !!actor && !isFetching,
   });
 }

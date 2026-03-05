@@ -14,10 +14,17 @@ export class ExternalBlob {
     static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
     withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
 }
+export interface ShippingOption {
+    name: string;
+    itemPrice: bigint;
+    basePrice: bigint;
+}
 export interface Product {
     id: string;
     categoryId: string;
     weight: bigint;
+    featured: boolean;
+    order: bigint;
     name: string;
     description: string;
     sizes: Array<Size>;
@@ -29,14 +36,7 @@ export interface Category {
     id: string;
     order: bigint;
     name: string;
-}
-export interface Address {
-    zip: string;
-    street: string;
-    country: string;
-    city: string;
-    name: string;
-    state: string;
+    description: string;
 }
 export interface TransformationOutput {
     status: bigint;
@@ -55,6 +55,14 @@ export interface SocialLinks {
     instagram: string;
     kick: string;
     youtube: string;
+}
+export interface Address {
+    zip: string;
+    street: string;
+    country: string;
+    city: string;
+    name: string;
+    state: string;
 }
 export interface HeroSection {
     tagline: string;
@@ -92,6 +100,14 @@ export interface TransformationInput {
     context: Uint8Array;
     response: http_request_result;
 }
+export interface ShippingRates {
+    australia: bigint;
+    usExpress: bigint;
+    usOvernight: bigint;
+    usStandard: bigint;
+    canada: bigint;
+    restOfWorld: bigint;
+}
 export type Color = string;
 export type StripeSessionStatus = {
     __kind__: "completed";
@@ -109,10 +125,13 @@ export interface StripeConfiguration {
     allowedCountries: Array<string>;
     secretKey: string;
 }
-export interface ShippingOption {
+export interface NewsletterSubscriber {
+    signupDate: bigint;
+    email: string;
+}
+export interface UserProfile {
     name: string;
-    itemPrice: bigint;
-    basePrice: bigint;
+    email: string;
 }
 export enum Size {
     L = "L",
@@ -139,21 +158,30 @@ export interface backendInterface {
     deleteCategory(id: string): Promise<void>;
     deleteProduct(id: string): Promise<void>;
     getAllOrders(): Promise<Array<Order>>;
+    getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCategories(): Promise<Array<Category>>;
     getContactForms(): Promise<Array<ContactForm>>;
     getHeroSection(): Promise<HeroSection | null>;
+    getNewsletterSubscribers(): Promise<Array<NewsletterSubscriber>>;
     getOrder(id: string): Promise<Order | null>;
     getProducts(): Promise<Array<Product>>;
+    getShippingRates(): Promise<ShippingRates>;
     getSocialLinks(): Promise<SocialLinks | null>;
     getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;
-    isAdmin(): Promise<boolean>;
+    getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     isStripeConfigured(): Promise<boolean>;
+    reorderCategories(orderedIds: Array<string>): Promise<void>;
+    reorderProducts(orderedIds: Array<string>): Promise<void>;
+    saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setHeroSection(section: HeroSection): Promise<void>;
+    setProductFeatured(id: string, featured: boolean): Promise<void>;
+    setShippingRates(rates: ShippingRates): Promise<void>;
     setSocialLinks(links: SocialLinks): Promise<void>;
     setStripeConfiguration(config: StripeConfiguration): Promise<void>;
     submitContactForm(form: ContactForm): Promise<void>;
+    subscribeToNewsletter(email: string): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
     updateCategory(category: Category): Promise<void>;
     updateOrderCost(orderId: string, cost: bigint): Promise<void>;

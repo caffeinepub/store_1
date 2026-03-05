@@ -1,13 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
-import type { ContactForm } from '../backend';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { ContactForm } from "../backend";
+import { useActor } from "./useActor";
 
 export function useSubmitContactForm() {
   const { actor } = useActor();
 
   return useMutation({
-    mutationFn: async (form: Omit<ContactForm, 'timestamp'>) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async (form: Omit<ContactForm, "timestamp">) => {
+      if (!actor) throw new Error("Actor not available");
       return actor.submitContactForm({
         ...form,
         timestamp: BigInt(Date.now()),
@@ -20,7 +20,7 @@ export function useGetContactForms() {
   const { actor, isFetching } = useActor();
 
   return useQuery<ContactForm[]>({
-    queryKey: ['contactForms'],
+    queryKey: ["contactForms"],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getContactForms();

@@ -1,38 +1,45 @@
-import { Link } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { useGetProducts } from '../hooks/useProducts';
-import { useGetHeroSection } from '../hooks/useHeroSection';
-import { ArrowRight } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
+import { useGetHeroSection } from "../hooks/useHeroSection";
+import { useGetProducts } from "../hooks/useProducts";
 
 export default function HomePage() {
   const { data: products = [] } = useGetProducts();
   const { data: heroSection } = useGetHeroSection();
-  const featuredProducts = products.slice(0, 4);
+  const featuredProducts = products.filter((p) => p.featured);
 
   const heroImageUrl = heroSection?.image?.getDirectURL();
-  const headline = heroSection?.headline || 'STREETWEAR REDEFINED';
-  const tagline = heroSection?.tagline || 'Exclusive drops. Limited editions. Unmatched style.';
+  const headline = heroSection?.headline || "STREETWEAR REDEFINED";
+  const tagline =
+    heroSection?.tagline ||
+    "Exclusive drops. Limited editions. Unmatched style.";
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative h-[600px] flex items-center justify-center bg-gradient-to-br from-background via-accent/20 to-background overflow-hidden">
         {heroImageUrl && (
-          <div 
-            className="absolute inset-0 bg-cover bg-center opacity-20" 
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-20"
             style={{ backgroundImage: `url(${heroImageUrl})` }}
           />
         )}
-        <div className="relative z-10 text-center space-y-6 px-4">
+        <div className="relative z-10 text-center space-y-8 px-4">
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight whitespace-pre-line">
-            {headline.split(' ').map((word, i, arr) => (
-              i === arr.length - 1 ? (
-                <span key={i} className="block text-primary">{word}</span>
-              ) : (
-                <span key={i}>{word} </span>
-              )
-            ))}
+            {(() => {
+              const words = headline.split(" ");
+              return words.map((word, i) =>
+                i === words.length - 1 ? (
+                  <span key={word} className="block text-primary">
+                    {word}
+                  </span>
+                ) : (
+                  <span key={word}>{word} </span>
+                ),
+              );
+            })()}
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             {tagline}
@@ -49,18 +56,26 @@ export default function HomePage() {
       {/* Featured Products */}
       <section className="container py-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Products</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Featured Products
+          </h2>
           <p className="text-muted-foreground">Check out our latest drops</p>
         </div>
 
         {featuredProducts.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No products available yet. Check back soon!</p>
+            <p className="text-muted-foreground">
+              No products available yet. Check back soon!
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredProducts.map((product) => (
-              <Link key={product.id} to="/product/$productId" params={{ productId: product.id }}>
+              <Link
+                key={product.id}
+                to="/product/$productId"
+                params={{ productId: product.id }}
+              >
                 <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                   <div className="aspect-square overflow-hidden bg-accent/10">
                     {product.images.length > 0 ? (

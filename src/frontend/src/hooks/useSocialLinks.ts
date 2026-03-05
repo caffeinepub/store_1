@@ -1,14 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
-import type { SocialLinks } from '../backend';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { SocialLinks } from "../backend";
+import { useActor } from "./useActor";
 
 export function useGetSocialLinks() {
   const { actor, isFetching: actorFetching } = useActor();
 
   return useQuery<SocialLinks | null>({
-    queryKey: ['socialLinks'],
+    queryKey: ["socialLinks"],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.getSocialLinks();
     },
     enabled: !!actor && !actorFetching,
@@ -21,11 +21,11 @@ export function useSetSocialLinks() {
 
   return useMutation({
     mutationFn: async (links: SocialLinks) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       return actor.setSocialLinks(links);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['socialLinks'] });
+      queryClient.invalidateQueries({ queryKey: ["socialLinks"] });
     },
   });
 }

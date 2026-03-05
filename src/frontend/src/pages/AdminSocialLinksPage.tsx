@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useGetSocialLinks, useSetSocialLinks } from '../hooks/useSocialLinks';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ArrowLeft, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useNavigate } from "@tanstack/react-router";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useInternetIdentity } from "../hooks/useInternetIdentity";
+import { useGetSocialLinks, useSetSocialLinks } from "../hooks/useSocialLinks";
 
 export default function AdminSocialLinksPage() {
   const { identity } = useInternetIdentity();
@@ -15,19 +15,19 @@ export default function AdminSocialLinksPage() {
   const { data: socialLinks, isLoading } = useGetSocialLinks();
   const setSocialLinks = useSetSocialLinks();
 
-  const [youtube, setYoutube] = useState('');
-  const [instagram, setInstagram] = useState('');
-  const [tiktok, setTiktok] = useState('');
-  const [twitch, setTwitch] = useState('');
-  const [kick, setKick] = useState('');
+  const [youtube, setYoutube] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [tiktok, setTiktok] = useState("");
+  const [twitch, setTwitch] = useState("");
+  const [kick, setKick] = useState("");
 
   useEffect(() => {
     if (socialLinks) {
-      setYoutube(socialLinks.youtube || '');
-      setInstagram(socialLinks.instagram || '');
-      setTiktok(socialLinks.tiktok || '');
-      setTwitch(socialLinks.twitch || '');
-      setKick(socialLinks.kick || '');
+      setYoutube(socialLinks.youtube || "");
+      setInstagram(socialLinks.instagram || "");
+      setTiktok(socialLinks.tiktok || "");
+      setTwitch(socialLinks.twitch || "");
+      setKick(socialLinks.kick || "");
     }
   }, [socialLinks]);
 
@@ -36,8 +36,10 @@ export default function AdminSocialLinksPage() {
       <div className="container py-12">
         <Card className="max-w-md mx-auto">
           <CardContent className="pt-6 text-center space-y-4">
-            <p className="text-muted-foreground">Please log in to access this page</p>
-            <Button onClick={() => navigate({ to: '/' })}>Go to Home</Button>
+            <p className="text-muted-foreground">
+              Please log in to access this page
+            </p>
+            <Button onClick={() => navigate({ to: "/" })}>Go to Home</Button>
           </CardContent>
         </Card>
       </div>
@@ -56,10 +58,10 @@ export default function AdminSocialLinksPage() {
         kick: kick.trim(),
       });
 
-      toast.success('Social links updated successfully!');
+      toast.success("Social links updated successfully!");
     } catch (error) {
-      console.error('Failed to update social links:', error);
-      toast.error('Failed to update social links');
+      console.error("Failed to update social links:", error);
+      toast.error("Failed to update social links");
     }
   };
 
@@ -75,7 +77,7 @@ export default function AdminSocialLinksPage() {
     <div className="container py-12 max-w-3xl">
       <Button
         variant="ghost"
-        onClick={() => navigate({ to: '/admin' })}
+        onClick={() => navigate({ to: "/admin" })}
         className="mb-6"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -158,14 +160,18 @@ export default function AdminSocialLinksPage() {
               </p>
             </div>
 
-            <Button type="submit" disabled={setSocialLinks.isPending} className="w-full">
+            <Button
+              type="submit"
+              disabled={setSocialLinks.isPending}
+              className="w-full"
+            >
               {setSocialLinks.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
                 </>
               ) : (
-                'Save Changes'
+                "Save Changes"
               )}
             </Button>
           </form>

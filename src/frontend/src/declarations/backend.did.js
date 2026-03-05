@@ -23,6 +23,7 @@ export const Category = IDL.Record({
   'id' : IDL.Text,
   'order' : IDL.Nat,
   'name' : IDL.Text,
+  'description' : IDL.Text,
 });
 export const Size = IDL.Variant({
   'L' : IDL.Null,
@@ -40,6 +41,8 @@ export const Product = IDL.Record({
   'id' : IDL.Text,
   'categoryId' : IDL.Text,
   'weight' : IDL.Nat,
+  'featured' : IDL.Bool,
+  'order' : IDL.Nat,
   'name' : IDL.Text,
   'description' : IDL.Text,
   'sizes' : IDL.Vec(Size),
@@ -83,6 +86,10 @@ export const Order = IDL.Record({
   'shippingAddress' : Address,
   'products' : IDL.Vec(Product),
 });
+export const UserProfile = IDL.Record({
+  'name' : IDL.Text,
+  'email' : IDL.Text,
+});
 export const ContactForm = IDL.Record({
   'name' : IDL.Text,
   'email' : IDL.Text,
@@ -93,6 +100,18 @@ export const HeroSection = IDL.Record({
   'tagline' : IDL.Text,
   'headline' : IDL.Text,
   'image' : IDL.Opt(ExternalBlob),
+});
+export const NewsletterSubscriber = IDL.Record({
+  'signupDate' : IDL.Int,
+  'email' : IDL.Text,
+});
+export const ShippingRates = IDL.Record({
+  'australia' : IDL.Nat,
+  'usExpress' : IDL.Nat,
+  'usOvernight' : IDL.Nat,
+  'usStandard' : IDL.Nat,
+  'canada' : IDL.Nat,
+  'restOfWorld' : IDL.Nat,
 });
 export const SocialLinks = IDL.Record({
   'tiktok' : IDL.Text,
@@ -162,7 +181,11 @@ export const idlService = IDL.Service({
   'addCategory' : IDL.Func([Category], [], []),
   'addProduct' : IDL.Func([Product], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-  'calculateShipping' : IDL.Func([IDL.Text, IDL.Vec(Product)], [IDL.Nat], []),
+  'calculateShipping' : IDL.Func(
+      [IDL.Text, IDL.Vec(Product)],
+      [IDL.Nat],
+      ['query'],
+    ),
   'createCheckoutSession' : IDL.Func(
       [IDL.Vec(ShoppingItem), IDL.Text, IDL.Text],
       [IDL.Text],
@@ -176,21 +199,38 @@ export const idlService = IDL.Service({
   'deleteCategory' : IDL.Func([IDL.Text], [], []),
   'deleteProduct' : IDL.Func([IDL.Text], [], []),
   'getAllOrders' : IDL.Func([], [IDL.Vec(Order)], ['query']),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getCategories' : IDL.Func([], [IDL.Vec(Category)], ['query']),
   'getContactForms' : IDL.Func([], [IDL.Vec(ContactForm)], ['query']),
   'getHeroSection' : IDL.Func([], [IDL.Opt(HeroSection)], ['query']),
+  'getNewsletterSubscribers' : IDL.Func(
+      [],
+      [IDL.Vec(NewsletterSubscriber)],
+      ['query'],
+    ),
   'getOrder' : IDL.Func([IDL.Text], [IDL.Opt(Order)], ['query']),
   'getProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+  'getShippingRates' : IDL.Func([], [ShippingRates], ['query']),
   'getSocialLinks' : IDL.Func([], [IDL.Opt(SocialLinks)], ['query']),
   'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
-  'isAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
+  'reorderCategories' : IDL.Func([IDL.Vec(IDL.Text)], [], []),
+  'reorderProducts' : IDL.Func([IDL.Vec(IDL.Text)], [], []),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'setHeroSection' : IDL.Func([HeroSection], [], []),
+  'setProductFeatured' : IDL.Func([IDL.Text, IDL.Bool], [], []),
+  'setShippingRates' : IDL.Func([ShippingRates], [], []),
   'setSocialLinks' : IDL.Func([SocialLinks], [], []),
   'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
   'submitContactForm' : IDL.Func([ContactForm], [], []),
+  'subscribeToNewsletter' : IDL.Func([IDL.Text], [], []),
   'transform' : IDL.Func(
       [TransformationInput],
       [TransformationOutput],
@@ -220,6 +260,7 @@ export const idlFactory = ({ IDL }) => {
     'id' : IDL.Text,
     'order' : IDL.Nat,
     'name' : IDL.Text,
+    'description' : IDL.Text,
   });
   const Size = IDL.Variant({
     'L' : IDL.Null,
@@ -237,6 +278,8 @@ export const idlFactory = ({ IDL }) => {
     'id' : IDL.Text,
     'categoryId' : IDL.Text,
     'weight' : IDL.Nat,
+    'featured' : IDL.Bool,
+    'order' : IDL.Nat,
     'name' : IDL.Text,
     'description' : IDL.Text,
     'sizes' : IDL.Vec(Size),
@@ -280,6 +323,7 @@ export const idlFactory = ({ IDL }) => {
     'shippingAddress' : Address,
     'products' : IDL.Vec(Product),
   });
+  const UserProfile = IDL.Record({ 'name' : IDL.Text, 'email' : IDL.Text });
   const ContactForm = IDL.Record({
     'name' : IDL.Text,
     'email' : IDL.Text,
@@ -290,6 +334,18 @@ export const idlFactory = ({ IDL }) => {
     'tagline' : IDL.Text,
     'headline' : IDL.Text,
     'image' : IDL.Opt(ExternalBlob),
+  });
+  const NewsletterSubscriber = IDL.Record({
+    'signupDate' : IDL.Int,
+    'email' : IDL.Text,
+  });
+  const ShippingRates = IDL.Record({
+    'australia' : IDL.Nat,
+    'usExpress' : IDL.Nat,
+    'usOvernight' : IDL.Nat,
+    'usStandard' : IDL.Nat,
+    'canada' : IDL.Nat,
+    'restOfWorld' : IDL.Nat,
   });
   const SocialLinks = IDL.Record({
     'tiktok' : IDL.Text,
@@ -356,7 +412,11 @@ export const idlFactory = ({ IDL }) => {
     'addCategory' : IDL.Func([Category], [], []),
     'addProduct' : IDL.Func([Product], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-    'calculateShipping' : IDL.Func([IDL.Text, IDL.Vec(Product)], [IDL.Nat], []),
+    'calculateShipping' : IDL.Func(
+        [IDL.Text, IDL.Vec(Product)],
+        [IDL.Nat],
+        ['query'],
+      ),
     'createCheckoutSession' : IDL.Func(
         [IDL.Vec(ShoppingItem), IDL.Text, IDL.Text],
         [IDL.Text],
@@ -370,21 +430,38 @@ export const idlFactory = ({ IDL }) => {
     'deleteCategory' : IDL.Func([IDL.Text], [], []),
     'deleteProduct' : IDL.Func([IDL.Text], [], []),
     'getAllOrders' : IDL.Func([], [IDL.Vec(Order)], ['query']),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getCategories' : IDL.Func([], [IDL.Vec(Category)], ['query']),
     'getContactForms' : IDL.Func([], [IDL.Vec(ContactForm)], ['query']),
     'getHeroSection' : IDL.Func([], [IDL.Opt(HeroSection)], ['query']),
+    'getNewsletterSubscribers' : IDL.Func(
+        [],
+        [IDL.Vec(NewsletterSubscriber)],
+        ['query'],
+      ),
     'getOrder' : IDL.Func([IDL.Text], [IDL.Opt(Order)], ['query']),
     'getProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+    'getShippingRates' : IDL.Func([], [ShippingRates], ['query']),
     'getSocialLinks' : IDL.Func([], [IDL.Opt(SocialLinks)], ['query']),
     'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
-    'isAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
+    'reorderCategories' : IDL.Func([IDL.Vec(IDL.Text)], [], []),
+    'reorderProducts' : IDL.Func([IDL.Vec(IDL.Text)], [], []),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'setHeroSection' : IDL.Func([HeroSection], [], []),
+    'setProductFeatured' : IDL.Func([IDL.Text, IDL.Bool], [], []),
+    'setShippingRates' : IDL.Func([ShippingRates], [], []),
     'setSocialLinks' : IDL.Func([SocialLinks], [], []),
     'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
     'submitContactForm' : IDL.Func([ContactForm], [], []),
+    'subscribeToNewsletter' : IDL.Func([IDL.Text], [], []),
     'transform' : IDL.Func(
         [TransformationInput],
         [TransformationOutput],

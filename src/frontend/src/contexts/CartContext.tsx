@@ -5,14 +5,41 @@ import {
   useEffect,
   useState,
 } from "react";
-import { ExternalBlob } from "../backend";
 import type { Color, Product, Size } from "../backend";
 
+// A serialization-safe version of a cart product (no ExternalBlob instances)
+export interface CartProduct {
+  id: string;
+  name: string;
+  price: number;
+  imageUrls: string[];
+  sizes: Size[];
+  colors: Color[];
+  categoryId: string;
+  description: string;
+  featured: boolean;
+}
+
 export interface CartItem {
-  product: Product;
+  product: CartProduct;
   size: Size;
   color: Color;
   quantity: number;
+}
+
+/** Convert a backend Product to a serialization-safe CartProduct */
+export function toCartProduct(product: Product): CartProduct {
+  return {
+    id: product.id,
+    name: product.name,
+    price: Number(product.price),
+    imageUrls: product.images.map((img) => img.getDirectURL()),
+    sizes: product.sizes,
+    colors: product.colors,
+    categoryId: product.categoryId,
+    description: product.description,
+    featured: product.featured,
+  };
 }
 
 interface CartContextType {
@@ -37,40 +64,23 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-function cartReplacer(_key: string, value: unknown) {
-  if (typeof value === "bigint") {
-    return { __bigint__: value.toString() };
-  }
-  // Serialize ExternalBlob instances as a plain object with the URL
-  if (
-    value &&
-    typeof value === "object" &&
-    typeof (value as ExternalBlob).getDirectURL === "function"
-  ) {
-    return { __externalBlob__: (value as ExternalBlob).getDirectURL() };
-  }
-  return value;
-}
-
-function cartReviver(_key: string, value: unknown) {
-  if (value && typeof value === "object") {
-    if ("__bigint__" in (value as object)) {
-      return BigInt((value as { __bigint__: string }).__bigint__);
-    }
-    if ("__externalBlob__" in (value as object)) {
-      return ExternalBlob.fromURL(
-        (value as { __externalBlob__: string }).__externalBlob__,
-      );
-    }
-  }
-  return value;
-}
-
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem("cart");
-      return saved ? JSON.parse(saved, cartReviver) : [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved) as CartItem[];
+      // Ensure price is always a number (guard against old BigInt-serialized data)
+      return parsed.map((item) => ({
+        ...item,
+        product: {
+          ...item.product,
+          price: Number(item.product.price),
+          imageUrls: Array.isArray(item.product.imageUrls)
+            ? item.product.imageUrls
+            : [],
+        },
+      }));
     } catch {
       return [];
     }
@@ -78,7 +88,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem("cart", JSON.stringify(items, cartReplacer));
+      localStorage.setItem("cart", JSON.stringify(items));
     } catch (error) {
       console.error("Failed to save cart to localStorage:", error);
     }
@@ -90,23 +100,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
     color: Color,
     quantity: number,
   ) => {
+    const cartProduct = toCartProduct(product);
     setItems((prev) => {
       const existing = prev.find(
         (item) =>
-          item.product.id === product.id &&
+          item.product.id === cartProduct.id &&
           item.size === size &&
           item.color === color,
       );
       if (existing) {
         return prev.map((item) =>
-          item.product.id === product.id &&
+          item.product.id === cartProduct.id &&
           item.size === size &&
           item.color === color
             ? { ...item, quantity: item.quantity + quantity }
             : item,
         );
       }
-      return [...prev, { product, size, color, quantity }];
+      return [...prev, { product: cartProduct, size, color, quantity }];
     });
   };
 
@@ -150,7 +161,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const getCartTotal = () => {
     return items.reduce(
-      (total, item) => total + Number(item.product.price) * item.quantity,
+      (total, item) => total + item.product.price * item.quantity,
       0,
     );
   };

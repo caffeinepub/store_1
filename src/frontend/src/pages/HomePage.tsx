@@ -13,7 +13,7 @@ export default function HomePage() {
   const heroImageUrl = heroSection?.image?.getDirectURL();
   const headline = heroSection?.headline || "STREETWEAR REDEFINED";
   const tagline =
-    heroSection?.tagline ||
+    heroSection?.tagline ??
     "Exclusive drops. Limited editions. Unmatched style.";
 
   return (
@@ -26,7 +26,7 @@ export default function HomePage() {
             style={{ backgroundImage: `url(${heroImageUrl})` }}
           />
         )}
-        <div className="relative z-10 text-center space-y-8 px-4">
+        <div className="relative z-10 text-center space-y-10 px-4">
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight whitespace-pre-line">
             {(() => {
               const words = headline.split(" ");
@@ -41,10 +41,16 @@ export default function HomePage() {
               );
             })()}
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            {tagline}
-          </p>
-          <Link to="/shop">
+          {tagline && (
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              {tagline}
+            </p>
+          )}
+          <Link
+            to="/shop"
+            className="mt-6 inline-block"
+            data-ocid="hero.primary_button"
+          >
             <Button size="lg" className="text-lg px-8">
               Shop Now
               <ArrowRight className="ml-2 h-5 w-5" />

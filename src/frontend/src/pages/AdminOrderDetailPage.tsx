@@ -28,7 +28,8 @@ import {
 } from "../hooks/useOrders";
 
 export default function AdminOrderDetailPage() {
-  const { orderId } = useParams({ from: "/admin/orders/$orderId" });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { orderId } = useParams({ from: "/admin/orders/$orderId" as any });
   const navigate = useNavigate();
   const { data: order, isLoading } = useGetOrder(orderId);
   const updateStatus = useUpdateOrderStatus();
@@ -53,11 +54,8 @@ export default function AdminOrderDetailPage() {
         <Card>
           <CardContent className="pt-6 text-center">
             <p className="text-muted-foreground">Order not found</p>
-            <Button
-              onClick={() => navigate({ to: "/admin/orders" })}
-              className="mt-4"
-            >
-              Back to Orders
+            <Button onClick={() => navigate({ to: "/admin" })} className="mt-4">
+              Back to Dashboard
             </Button>
           </CardContent>
         </Card>
@@ -140,11 +138,11 @@ TOTAL: $${(Number(order.total) / 100).toFixed(2)}
     <div className="container py-12">
       <Button
         variant="ghost"
-        onClick={() => navigate({ to: "/admin/orders" })}
+        onClick={() => navigate({ to: "/admin" })}
         className="mb-6"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Orders
+        Back to Dashboard
       </Button>
 
       <div className="flex justify-between items-center mb-8">

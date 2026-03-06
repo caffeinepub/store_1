@@ -1,7 +1,9 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNavigate } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft, CreditCard, Loader2, ShoppingBag } from "lucide-react";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import type { ShoppingItem } from "../backend";
@@ -10,42 +12,28 @@ import { useCreateCheckoutSession } from "../hooks/useStripeCheckout";
 
 export default function PaymentPage() {
   const navigate = useNavigate();
-  const { items } = useCart();
+  const { items, getCartTotal } = useCart();
   const createCheckoutSession = useCreateCheckoutSession();
 
   useEffect(() => {
-    const checkoutData = sessionStorage.getItem("checkoutData");
-    if (!checkoutData || items.length === 0) {
-      toast.error("No checkout data found");
+    if (items.length === 0) {
       navigate({ to: "/cart" });
     }
   }, [items, navigate]);
 
+  if (items.length === 0) {
+    return null;
+  }
+
   const handlePayment = async () => {
     try {
-      const checkoutData = JSON.parse(
-        sessionStorage.getItem("checkoutData") || "{}",
-      );
-
       const shoppingItems: ShoppingItem[] = items.map((item) => ({
         productName: item.product.name,
-        productDescription: `${item.product.description} - Size: ${item.size}, Color: ${item.color}`,
-        priceInCents: item.product.price,
+        productDescription: `Size: ${item.size} | Color: ${item.color}`,
+        priceInCents: BigInt(item.product.price),
         quantity: BigInt(item.quantity),
         currency: "USD",
       }));
-
-      // Add shipping as a line item
-      shoppingItems.push({
-        productName: "Shipping",
-        productDescription: `${checkoutData.shipping.name} (${checkoutData.shipping.days})`,
-        priceInCents: BigInt(
-          checkoutData.shipping.basePrice +
-            checkoutData.shipping.itemPrice * (items.length - 1),
-        ),
-        quantity: BigInt(1),
-        currency: "USD",
-      });
 
       const session = await createCheckoutSession.mutateAsync(shoppingItems);
 
@@ -54,38 +42,157 @@ export default function PaymentPage() {
       }
 
       window.location.href = session.url;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Payment error:", error);
-      toast.error(error.message || "Failed to initiate payment");
+      const message =
+        error instanceof Error ? error.message : "Failed to initiate payment";
+      toast.error(message);
     }
   };
 
+  const subtotal = getCartTotal();
+
   return (
     <div className="container py-12">
-      <div className="max-w-md mx-auto">
+      <div className="max-w-lg mx-auto">
+        {/* Back button */}
+        <Link to="/cart" data-ocid="payment.link">
+          <Button variant="ghost" className="mb-6 -ml-2">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Cart
+          </Button>
+        </Link>
+
         <Card>
-          <CardHeader>
-            <CardTitle>Complete Your Purchase</CardTitle>
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <ShoppingBag className="h-5 w-5 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Order Summary</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground">
-              Click the button below to proceed to secure payment with Stripe.
+
+          <CardContent className="space-y-6">
+            {/* Item list */}
+            <div className="space-y-4" data-ocid="payment.list">
+              {items.map((item, index) => (
+                <div
+                  key={`${item.product.id}-${item.size}-${item.color}`}
+                  className="flex gap-4 items-start"
+                  data-ocid={`payment.item.${index + 1}`}
+                >
+                  {/* Thumbnail */}
+                  <div className="w-16 h-16 rounded-md overflow-hidden bg-accent/10 flex-shrink-0 border border-border">
+                    {item.product.imageUrls.length > 0 ? (
+                      <img
+                        src={item.product.imageUrls[0]}
+                        alt={item.product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                        No img
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Details */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm leading-tight truncate">
+                      {item.product.name}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 mt-1.5">
+                      <Badge variant="secondary" className="text-xs px-2 py-0">
+                        {item.size}
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs px-2 py-0">
+                        {item.color}
+                      </Badge>
+                      {item.quantity > 1 && (
+                        <Badge variant="outline" className="text-xs px-2 py-0">
+                          ×{item.quantity}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Price */}
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-bold text-primary">
+                      ${((item.product.price * item.quantity) / 100).toFixed(2)}
+                    </p>
+                    {item.quantity > 1 && (
+                      <p className="text-xs text-muted-foreground">
+                        ${(item.product.price / 100).toFixed(2)} each
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <Separator />
+
+            {/* Totals */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-medium">
+                  ${(subtotal / 100).toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Shipping</span>
+                <span className="text-muted-foreground italic">
+                  Calculated at checkout
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Taxes</span>
+                <span className="text-muted-foreground italic">
+                  Calculated at checkout
+                </span>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Stripe note */}
+            <p className="text-xs text-muted-foreground text-center">
+              You'll complete your purchase on Stripe's secure checkout page,
+              where shipping and taxes will be calculated based on your address.
             </p>
+
+            {/* Pay button */}
             <Button
               onClick={handlePayment}
               disabled={createCheckoutSession.isPending}
               className="w-full"
               size="lg"
+              data-ocid="payment.primary_button"
             >
               {createCheckoutSession.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Processing...
+                  Redirecting to Stripe...
                 </>
               ) : (
-                "Pay with Stripe"
+                <>
+                  <CreditCard className="mr-2 h-5 w-5" />
+                  Pay with Stripe
+                </>
               )}
             </Button>
+
+            {createCheckoutSession.isPending && (
+              <p
+                className="text-xs text-muted-foreground text-center animate-pulse"
+                data-ocid="payment.loading_state"
+              >
+                Setting up your secure payment session...
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>

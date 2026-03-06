@@ -7,18 +7,15 @@ import {
 } from "@tanstack/react-router";
 import { ThemeProvider } from "next-themes";
 import Layout from "./components/Layout";
-import AdminAnalyticsPage from "./pages/AdminAnalyticsPage";
 import AdminCategoriesPage from "./pages/AdminCategoriesPage";
 import AdminContactFormsPage from "./pages/AdminContactFormsPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminHeroSectionPage from "./pages/AdminHeroSectionPage";
 import AdminNewsletterPage from "./pages/AdminNewsletterPage";
-import AdminOrderDetailPage from "./pages/AdminOrderDetailPage";
-import AdminOrdersPage from "./pages/AdminOrdersPage";
 import AdminProductsPage from "./pages/AdminProductsPage";
 import AdminSocialLinksPage from "./pages/AdminSocialLinksPage";
+import AdminStripePage from "./pages/AdminStripePage";
 import CartPage from "./pages/CartPage";
-import CheckoutPage from "./pages/CheckoutPage";
 import ContactPage from "./pages/ContactPage";
 import HomePage from "./pages/HomePage";
 import PaymentFailurePage from "./pages/PaymentFailurePage";
@@ -65,12 +62,6 @@ const cartRoute = createRoute({
   component: CartPage,
 });
 
-const checkoutRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/checkout",
-  component: CheckoutPage,
-});
-
 const paymentRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/payment",
@@ -107,22 +98,10 @@ const adminCategoriesRoute = createRoute({
   component: AdminCategoriesPage,
 });
 
-const adminOrdersRoute = createRoute({
+const adminStripeRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/admin/orders",
-  component: AdminOrdersPage,
-});
-
-const adminOrderDetailRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/admin/orders/$orderId",
-  component: AdminOrderDetailPage,
-});
-
-const adminAnalyticsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/admin/analytics",
-  component: AdminAnalyticsPage,
+  path: "/admin/stripe",
+  component: AdminStripePage,
 });
 
 const adminNewsletterRoute = createRoute({
@@ -179,16 +158,13 @@ const routeTree = rootRoute.addChildren([
   productRoute,
   contactRoute,
   cartRoute,
-  checkoutRoute,
   paymentRoute,
   paymentSuccessRoute,
   paymentFailureRoute,
   adminRoute,
   adminProductsRoute,
   adminCategoriesRoute,
-  adminOrdersRoute,
-  adminOrderDetailRoute,
-  adminAnalyticsRoute,
+  adminStripeRoute,
   adminNewsletterRoute,
   adminContactFormsRoute,
   adminHeroSectionRoute,

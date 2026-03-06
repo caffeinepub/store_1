@@ -73,8 +73,7 @@ export default function AdminOrdersPage() {
                   size="sm"
                   onClick={() =>
                     navigate({
-                      to: "/admin/orders/$orderId",
-                      params: { orderId: order.id },
+                      to: "/admin" as any, // route removed; orders managed via Stripe dashboard
                     })
                   }
                 >

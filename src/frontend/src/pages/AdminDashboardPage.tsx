@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
-  DollarSign,
+  CreditCard,
   Image,
   Loader2,
   Mail,
@@ -139,29 +139,15 @@ export default function AdminDashboardPage() {
           </Card>
         </Link>
 
-        <Link to="/admin/orders">
+        <Link to="/admin/stripe">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Orders</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Stripe</CardTitle>
+              <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <p className="text-xs text-muted-foreground">
-                View and manage orders
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link to="/admin/analytics">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Analytics</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">
-                Financial insights
+                Configure payment settings
               </p>
             </CardContent>
           </Card>

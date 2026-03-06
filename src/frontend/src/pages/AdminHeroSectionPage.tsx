@@ -66,8 +66,8 @@ export default function AdminHeroSectionPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!headline.trim() || !tagline.trim()) {
-      toast.error("Please fill in all fields");
+    if (!headline.trim()) {
+      toast.error("Please enter a headline");
       return;
     }
 
@@ -135,7 +135,7 @@ export default function AdminHeroSectionPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tagline">Tagline</Label>
+              <Label htmlFor="tagline">Tagline (optional)</Label>
               <Textarea
                 id="tagline"
                 value={tagline}

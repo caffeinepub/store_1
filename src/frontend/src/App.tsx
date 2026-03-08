@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { ThemeProvider } from "next-themes";
 import Layout from "./components/Layout";
+import AdminAnnouncementPage from "./pages/AdminAnnouncementPage";
 import AdminCategoriesPage from "./pages/AdminCategoriesPage";
 import AdminContactFormsPage from "./pages/AdminContactFormsPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
@@ -128,6 +129,12 @@ const adminSocialLinksRoute = createRoute({
   component: AdminSocialLinksPage,
 });
 
+const adminAnnouncementRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/announcement",
+  component: AdminAnnouncementPage,
+});
+
 const termsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/terms",
@@ -169,6 +176,7 @@ const routeTree = rootRoute.addChildren([
   adminContactFormsRoute,
   adminHeroSectionRoute,
   adminSocialLinksRoute,
+  adminAnnouncementRoute,
   termsRoute,
   privacyRoute,
   shippingRoute,

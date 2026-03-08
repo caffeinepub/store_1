@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Product } from "../backend";
+import type { AnnouncementBanner, Product } from "../backend";
+import { ProductStatus } from "../backend";
 import { useActor } from "./useActor";
 
 export function useGetProducts() {
@@ -14,6 +15,36 @@ export function useGetProducts() {
     enabled: !!actor && !isFetching,
   });
 }
+
+export function useGetAnnouncementBanner() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<AnnouncementBanner | null>({
+    queryKey: ["announcementBanner"],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getAnnouncementBanner();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useSetAnnouncementBanner() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (banner: AnnouncementBanner) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.setAnnouncementBanner(banner);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["announcementBanner"] });
+    },
+  });
+}
+
+export { ProductStatus };
 
 export function useAddProduct() {
   const { actor } = useActor();
@@ -83,6 +114,27 @@ export function useSetProductFeatured() {
     mutationFn: async ({ id, featured }: { id: string; featured: boolean }) => {
       if (!actor) throw new Error("Actor not available");
       return actor.setProductFeatured(id, featured);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+}
+
+export function useSetProductStatus() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: ProductStatus;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.setProductStatus(id, status);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });

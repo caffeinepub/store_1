@@ -18,6 +18,7 @@ export interface Address {
   'name' : string,
   'state' : string,
 }
+export interface AnnouncementBanner { 'enabled' : boolean, 'message' : string }
 export interface Category {
   'id' : string,
   'order' : bigint,
@@ -56,6 +57,7 @@ export interface Product {
   'id' : string,
   'categoryId' : string,
   'weight' : bigint,
+  'status' : ProductStatus,
   'featured' : boolean,
   'order' : bigint,
   'name' : string,
@@ -65,6 +67,9 @@ export interface Product {
   'price' : bigint,
   'images' : Array<ExternalBlob>,
 }
+export type ProductStatus = { 'hidden' : null } |
+  { 'available' : null } |
+  { 'soldOut' : null };
 export interface ShippingOption {
   'name' : string,
   'itemPrice' : bigint,
@@ -170,6 +175,7 @@ export interface _SERVICE {
   'deleteCategory' : ActorMethod<[string], undefined>,
   'deleteProduct' : ActorMethod<[string], undefined>,
   'getAllOrders' : ActorMethod<[], Array<Order>>,
+  'getAnnouncementBanner' : ActorMethod<[], [] | [AnnouncementBanner]>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCategories' : ActorMethod<[], Array<Category>>,
@@ -187,8 +193,10 @@ export interface _SERVICE {
   'reorderCategories' : ActorMethod<[Array<string>], undefined>,
   'reorderProducts' : ActorMethod<[Array<string>], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'setAnnouncementBanner' : ActorMethod<[AnnouncementBanner], undefined>,
   'setHeroSection' : ActorMethod<[HeroSection], undefined>,
   'setProductFeatured' : ActorMethod<[string, boolean], undefined>,
+  'setProductStatus' : ActorMethod<[string, ProductStatus], undefined>,
   'setShippingRates' : ActorMethod<[ShippingRates], undefined>,
   'setSocialLinks' : ActorMethod<[SocialLinks], undefined>,
   'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,

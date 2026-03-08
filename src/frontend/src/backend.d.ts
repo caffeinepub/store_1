@@ -23,6 +23,7 @@ export interface Product {
     id: string;
     categoryId: string;
     weight: bigint;
+    status: ProductStatus;
     featured: boolean;
     order: bigint;
     name: string;
@@ -56,13 +57,9 @@ export interface SocialLinks {
     kick: string;
     youtube: string;
 }
-export interface Address {
-    zip: string;
-    street: string;
-    country: string;
-    city: string;
-    name: string;
-    state: string;
+export interface AnnouncementBanner {
+    enabled: boolean;
+    message: string;
 }
 export interface HeroSection {
     tagline: string;
@@ -109,6 +106,14 @@ export interface ShippingRates {
     restOfWorld: bigint;
 }
 export type Color = string;
+export interface Address {
+    zip: string;
+    street: string;
+    country: string;
+    city: string;
+    name: string;
+    state: string;
+}
 export type StripeSessionStatus = {
     __kind__: "completed";
     completed: {
@@ -132,6 +137,11 @@ export interface NewsletterSubscriber {
 export interface UserProfile {
     name: string;
     email: string;
+}
+export enum ProductStatus {
+    hidden = "hidden",
+    available = "available",
+    soldOut = "soldOut"
 }
 export enum Size {
     L = "L",
@@ -158,6 +168,7 @@ export interface backendInterface {
     deleteCategory(id: string): Promise<void>;
     deleteProduct(id: string): Promise<void>;
     getAllOrders(): Promise<Array<Order>>;
+    getAnnouncementBanner(): Promise<AnnouncementBanner | null>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCategories(): Promise<Array<Category>>;
@@ -175,8 +186,10 @@ export interface backendInterface {
     reorderCategories(orderedIds: Array<string>): Promise<void>;
     reorderProducts(orderedIds: Array<string>): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    setAnnouncementBanner(banner: AnnouncementBanner): Promise<void>;
     setHeroSection(section: HeroSection): Promise<void>;
     setProductFeatured(id: string, featured: boolean): Promise<void>;
+    setProductStatus(id: string, status: ProductStatus): Promise<void>;
     setShippingRates(rates: ShippingRates): Promise<void>;
     setSocialLinks(links: SocialLinks): Promise<void>;
     setStripeConfiguration(config: StripeConfiguration): Promise<void>;

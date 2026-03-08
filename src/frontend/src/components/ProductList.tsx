@@ -21,8 +21,12 @@ import {
 import { Edit, Search, Star, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import type { Category, Product } from "../backend";
-import { useDeleteProduct, useSetProductFeatured } from "../hooks/useProducts";
+import { type Category, type Product, ProductStatus } from "../backend";
+import {
+  useDeleteProduct,
+  useSetProductFeatured,
+  useSetProductStatus,
+} from "../hooks/useProducts";
 
 interface ProductListProps {
   products: Product[];
@@ -40,6 +44,7 @@ export default function ProductList({
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const deleteProduct = useDeleteProduct();
   const setProductFeatured = useSetProductFeatured();
+  const setProductStatus = useSetProductStatus();
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
@@ -80,8 +85,32 @@ export default function ProductList({
     }
   };
 
+  const handleStatusChange = async (
+    product: Product,
+    newStatus: ProductStatus,
+  ) => {
+    try {
+      await setProductStatus.mutateAsync({ id: product.id, status: newStatus });
+      toast.success(`Product status updated to ${newStatus}`);
+    } catch (error) {
+      console.error("Error updating product status:", error);
+      toast.error("Failed to update product status");
+    }
+  };
+
   const getCategoryName = (categoryId: string) => {
     return categories.find((c) => c.id === categoryId)?.name || "Unknown";
+  };
+
+  const getStatusBadgeClass = (status: ProductStatus | undefined) => {
+    switch (status) {
+      case ProductStatus.soldOut:
+        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+      case ProductStatus.hidden:
+        return "bg-muted text-muted-foreground border-border";
+      default:
+        return "bg-green-500/20 text-green-400 border-green-500/30";
+    }
   };
 
   return (
@@ -130,7 +159,9 @@ export default function ProductList({
                   />
                 )}
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-lg">{product.name}</h3>
+                  <h3 className="font-semibold text-lg leading-tight pr-2">
+                    {product.name}
+                  </h3>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -149,9 +180,37 @@ export default function ProductList({
                     />
                   </Button>
                 </div>
-                <p className="text-sm text-muted-foreground mb-2">
+                <p className="text-sm text-muted-foreground mb-3">
                   {getCategoryName(product.categoryId)}
                 </p>
+                {/* Status selector */}
+                <div className="mb-3">
+                  <Select
+                    value={product.status ?? ProductStatus.available}
+                    onValueChange={(val) =>
+                      handleStatusChange(product, val as ProductStatus)
+                    }
+                    disabled={setProductStatus.isPending}
+                  >
+                    <SelectTrigger
+                      className={`h-8 text-xs border ${getStatusBadgeClass(product.status)}`}
+                      data-ocid={`product.select.${index + 1}`}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ProductStatus.available}>
+                        ✓ Available
+                      </SelectItem>
+                      <SelectItem value={ProductStatus.soldOut}>
+                        ⊘ Sold Out
+                      </SelectItem>
+                      <SelectItem value={ProductStatus.hidden}>
+                        ⊘ Hidden
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <p className="text-lg font-bold text-primary mb-2">
                   ${(Number(product.price) / 100).toFixed(2)}
                 </p>

@@ -1,55 +1,61 @@
 # SKR Lab
 
 ## Current State
-
-Full-stack streetwear e-commerce platform with:
-- Product catalog, cart, and multi-step checkout (cart → /checkout form → /payment → Stripe)
-- Checkout form collects: full name, email, street, city, state, zip, country, and shipping method selection
-- Payment page reads checkoutData from sessionStorage and creates a Stripe session with cart items + shipping line item
-- Admin dashboard with cards for: Products, Categories, Orders, Analytics, Hero Section, Social Links, Newsletter, Contact Forms
-- Admin orders pages (list + detail) with status tracking and per-order cost tracking
-- Admin analytics page showing total revenue, costs, profit
-- Hero section admin: headline + tagline (both required), optional image
-- HomePage: hero with tagline directly above "Shop Now" button with tight spacing
-- No Stripe configuration UI in admin dashboard
+- Full streetwear e-commerce platform with Motoko backend and React/TypeScript frontend
+- Product catalog with categories, sizes, colors, multiple images
+- Cart with localStorage persistence (URL-only image serialization to avoid BigInt/method issues)
+- Stripe checkout integration (direct redirect, no custom form)
+- Admin dashboard with product/category management, featured toggle, hero section, social links, newsletter, contact forms, Stripe config
+- Product type has: id, name, description, price, images, sizes, colors, categoryId, weight, order, featured
+- No product availability state (products are always visible and purchasable)
+- No announcement banner system
+- No cart upsell / "You might also like" section
+- No lava lamp / animated background on shop page
 
 ## Requested Changes (Diff)
 
 ### Add
-- Stripe Configuration card in admin dashboard linking to a new `/admin/stripe` page
-- `/admin/stripe` page: form to enter Stripe secret key + allowed countries, save via `setStripeConfiguration`
+- **Product availability field** on the Product type: a `status` field with three values — `#available`, `#soldOut`, `#hidden`
+- **`setProductStatus` backend API** — admin sets per-product availability status
+- **Announcement banner system** — `AnnouncementBanner` type with `message: Text` and `enabled: Bool`; `setAnnouncementBanner` (admin) and `getAnnouncementBanner` (public) APIs
+- **Announcement banner UI** — dismissible-by-admin-only top bar displayed site-wide above the nav, with placeholder text "Free worldwide shipping on orders over $75"
+- **Admin announcement banner management page/section** — toggle on/off + edit message text
+- **Cart upsell section** on CartPage — "You might also like" showing 2-3 random available products NOT already in the cart
+- **Lava lamp animated background** on ShopPage only — subtle slow-moving electric blue blobs at low opacity behind the product grid
 
 ### Modify
-- **Checkout flow**: Remove `/checkout` form page and `/payment` intermediate page entirely. Cart "Proceed to Checkout" button goes directly to Stripe via `createCheckoutSession`. Shipping options shown on cart page for region selection before going to Stripe, OR simplify to just send cart items to Stripe with a single shipping line item at a fixed rate — simplest: remove shipping pre-selection, let Stripe handle address, show cart items and a "Pay with Stripe" button directly on the cart summary or a minimal confirm page.
-- **Actually**: Replace the entire checkout flow with: Cart → minimal confirm page (shows items, total without shipping, note that shipping calculated at checkout) → Stripe. No address form. No CheckoutPage. No PaymentPage collecting address. The createCheckoutSession still passes all cart items as ShoppingItems.
-- **PaymentPage**: Repurpose as a simple "Review & Pay" confirm page — shows cart items with size/color, subtotal, and a single "Pay with Stripe" button. No form fields. Goes directly to Stripe.
-- **CheckoutPage**: Remove entirely (no longer needed). Cart's "Proceed to Checkout" button goes to /payment (the confirm page).
-- **Admin dashboard**: Remove Orders card and Analytics card
-- **Admin orders/analytics pages**: Keep files but remove routes and nav links (or redirect to admin)
-- **Hero Section admin**: Make tagline optional — remove required validation, allow empty string, update `handleSubmit` to not require tagline
-- **HomePage**: Increase spacing between tagline and "Shop Now" button (add more margin/padding between the `<p>` tagline and the `<Link>` button)
-- **HeroSection backend type**: tagline is already a Text field — frontend just needs to allow empty
+- **Product type** — add `status` field (variant: available / soldOut / hidden)
+- **Admin products page** — add availability status selector per product (Available / Sold Out / Hidden) in addition to existing featured toggle
+- **ShopPage** — filter out `#hidden` products from display; show "Sold Out" badge on `#soldOut` products and disable "Add to Cart"; add lava lamp canvas/CSS animation background
+- **ProductDetailPage** — respect `#hidden` (redirect or show not found); show "Sold Out" and disable add to cart for `#soldOut`
+- **CartPage** — add "You might also like" upsell section at bottom
+- **Backend `reorderProducts` and `updateProduct`** — preserve new `status` field
+- **AdminDashboardPage** — add Announcement Banner card linking to banner management
 
 ### Remove
-- `/checkout` route and CheckoutPage from routing (or repurpose)
-- Orders and Analytics cards from AdminDashboardPage
-- sessionStorage checkoutData dependency (PaymentPage no longer reads it)
+- Nothing removed
 
 ## Implementation Plan
 
-1. **Admin Stripe config page**: Create `AdminStripePage.tsx` with form for secretKey + allowedCountries (comma-separated input), calls `setStripeConfiguration`. Add route `/admin/stripe`. Add Stripe config card to AdminDashboardPage.
+1. **Backend**: Add `status` variant type to Product (`#available | #soldOut | #hidden`). Add `setProductStatus` API. Add `AnnouncementBanner` type, `setAnnouncementBanner` (admin), `getAnnouncementBanner` (public) APIs. Update all Product record constructions (reorderProducts, setProductFeatured) to carry `status` field through.
 
-2. **Simplify checkout flow**:
-   - Remove CheckoutPage form (address collection, shipping method selection)
-   - Repurpose PaymentPage as a "Review & Pay" page: shows cart items (name, size, color, quantity, price), subtotal note about shipping at Stripe, and "Pay with Stripe" button
-   - Update CartPage: "Proceed to Checkout" → navigates to `/payment`
-   - PaymentPage calls `createCheckoutSession` with cart items only (no shipping line item since address/shipping handled by Stripe)
-   - Remove `/checkout` route from App.tsx
+2. **Frontend - Product availability**:
+   - Update Product type usage to include `status`
+   - Admin products page: add a 3-state status selector (Available / Sold Out / Hidden) per product card
+   - ShopPage: filter hidden products, show Sold Out badge + disabled cart button for soldOut
+   - ProductDetailPage: handle soldOut and hidden states
 
-3. **Admin dashboard cleanup**: Remove Orders and Analytics link cards from AdminDashboardPage. Keep the page files but remove their routes from App.tsx.
+3. **Frontend - Announcement banner**:
+   - Fetch `getAnnouncementBanner` on app load
+   - Render a fixed top bar with the message when `enabled: true`, always visible until admin disables it
+   - Add admin page/section for banner management (toggle + text edit)
+   - Link from AdminDashboardPage
 
-4. **Hero section tagline optional**:
-   - `AdminHeroSectionPage.tsx`: remove tagline from required field validation, allow saving with empty tagline
-   - `HomePage.tsx`: only render the tagline `<p>` if tagline is non-empty; increase spacing/margin between tagline (or headline) and the Shop Now button
+4. **Frontend - Cart upsell**:
+   - On CartPage, fetch all products, exclude those already in cart, pick 2-3 random available ones
+   - Render as a horizontal product card strip with "You might also like" heading
 
-5. **HomePage spacing**: Change `space-y-8` to `space-y-12` or add explicit `mt-8` to the Shop Now button link.
+5. **Frontend - Lava lamp background**:
+   - On ShopPage only, render an absolutely positioned canvas or CSS blob animation behind the product grid
+   - Electric blue (#3B82F6 / oklch equivalent), very low opacity (0.08–0.12), slow movement (20-40s cycle)
+   - Uses requestAnimationFrame or CSS keyframes — no external library needed

@@ -10,10 +10,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { type Category, ExternalBlob, type Product, Size } from "../backend";
+import {
+  type Category,
+  ExternalBlob,
+  type Product,
+  ProductStatus,
+  Size,
+} from "../backend";
 import { useAddProduct, useUpdateProduct } from "../hooks/useProducts";
 
 interface ProductFormProps {
@@ -52,6 +58,7 @@ export default function ProductForm({
     [key: number]: number;
   }>({});
   const [featured, setFeatured] = useState(false);
+  const [status, setStatus] = useState<ProductStatus>(ProductStatus.available);
 
   const addProduct = useAddProduct();
   const updateProduct = useUpdateProduct();
@@ -66,6 +73,7 @@ export default function ProductForm({
       setColors(product.colors.length > 0 ? product.colors : [""]);
       setImages(product.images);
       setFeatured(product.featured ?? false);
+      setStatus(product.status ?? ProductStatus.available);
     }
   }, [product]);
 
@@ -149,6 +157,7 @@ export default function ProductForm({
         weight: BigInt(500), // Default weight in grams
         order: product?.order || BigInt(0),
         featured: featured,
+        status: status,
       };
 
       if (product) {
@@ -326,6 +335,23 @@ export default function ProductForm({
             className="cursor-pointer"
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="status">Product Status</Label>
+        <Select
+          value={status}
+          onValueChange={(val) => setStatus(val as ProductStatus)}
+        >
+          <SelectTrigger id="status">
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ProductStatus.available}>Available</SelectItem>
+            <SelectItem value={ProductStatus.soldOut}>Sold Out</SelectItem>
+            <SelectItem value={ProductStatus.hidden}>Hidden</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex items-center space-x-2">

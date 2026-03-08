@@ -6,6 +6,7 @@ import {
   Image,
   Loader2,
   Mail,
+  Megaphone,
   MessageSquare,
   Package,
   Share2,
@@ -17,7 +18,7 @@ import { useAdminCheck } from "../hooks/useAdminCheck";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 
 export default function AdminDashboardPage() {
-  const { identity, isInitializing } = useInternetIdentity();
+  const { identity } = useInternetIdentity();
   const navigate = useNavigate();
 
   const isAuthenticated = !!identity;
@@ -25,19 +26,7 @@ export default function AdminDashboardPage() {
   // Only run admin check after user has authenticated
   const { isAdmin, isLoading: adminCheckLoading, isFetched } = useAdminCheck();
 
-  // While auth client is initializing (loading stored session), show a spinner
-  if (isInitializing) {
-    return (
-      <div className="container py-20 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Not authenticated — show login button only, no admin checks
+  // Not authenticated (or still initializing) — always show login button first
   if (!isAuthenticated) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center px-4">
@@ -209,6 +198,22 @@ export default function AdminDashboardPage() {
             </CardHeader>
             <CardContent>
               <p className="text-xs text-muted-foreground">View submissions</p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link to="/admin/announcement">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Announcement Banner
+              </CardTitle>
+              <Megaphone className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground">
+                Manage site-wide announcement
+              </p>
             </CardContent>
           </Card>
         </Link>

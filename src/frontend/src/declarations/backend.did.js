@@ -25,6 +25,11 @@ export const Category = IDL.Record({
   'name' : IDL.Text,
   'description' : IDL.Text,
 });
+export const ProductStatus = IDL.Variant({
+  'hidden' : IDL.Null,
+  'available' : IDL.Null,
+  'soldOut' : IDL.Null,
+});
 export const Size = IDL.Variant({
   'L' : IDL.Null,
   'M' : IDL.Null,
@@ -41,6 +46,7 @@ export const Product = IDL.Record({
   'id' : IDL.Text,
   'categoryId' : IDL.Text,
   'weight' : IDL.Nat,
+  'status' : ProductStatus,
   'featured' : IDL.Bool,
   'order' : IDL.Nat,
   'name' : IDL.Text,
@@ -85,6 +91,10 @@ export const Order = IDL.Record({
   'timestamp' : IDL.Int,
   'shippingAddress' : Address,
   'products' : IDL.Vec(Product),
+});
+export const AnnouncementBanner = IDL.Record({
+  'enabled' : IDL.Bool,
+  'message' : IDL.Text,
 });
 export const UserProfile = IDL.Record({
   'name' : IDL.Text,
@@ -199,6 +209,11 @@ export const idlService = IDL.Service({
   'deleteCategory' : IDL.Func([IDL.Text], [], []),
   'deleteProduct' : IDL.Func([IDL.Text], [], []),
   'getAllOrders' : IDL.Func([], [IDL.Vec(Order)], ['query']),
+  'getAnnouncementBanner' : IDL.Func(
+      [],
+      [IDL.Opt(AnnouncementBanner)],
+      ['query'],
+    ),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getCategories' : IDL.Func([], [IDL.Vec(Category)], ['query']),
@@ -224,8 +239,10 @@ export const idlService = IDL.Service({
   'reorderCategories' : IDL.Func([IDL.Vec(IDL.Text)], [], []),
   'reorderProducts' : IDL.Func([IDL.Vec(IDL.Text)], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'setAnnouncementBanner' : IDL.Func([AnnouncementBanner], [], []),
   'setHeroSection' : IDL.Func([HeroSection], [], []),
   'setProductFeatured' : IDL.Func([IDL.Text, IDL.Bool], [], []),
+  'setProductStatus' : IDL.Func([IDL.Text, ProductStatus], [], []),
   'setShippingRates' : IDL.Func([ShippingRates], [], []),
   'setSocialLinks' : IDL.Func([SocialLinks], [], []),
   'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
@@ -262,6 +279,11 @@ export const idlFactory = ({ IDL }) => {
     'name' : IDL.Text,
     'description' : IDL.Text,
   });
+  const ProductStatus = IDL.Variant({
+    'hidden' : IDL.Null,
+    'available' : IDL.Null,
+    'soldOut' : IDL.Null,
+  });
   const Size = IDL.Variant({
     'L' : IDL.Null,
     'M' : IDL.Null,
@@ -278,6 +300,7 @@ export const idlFactory = ({ IDL }) => {
     'id' : IDL.Text,
     'categoryId' : IDL.Text,
     'weight' : IDL.Nat,
+    'status' : ProductStatus,
     'featured' : IDL.Bool,
     'order' : IDL.Nat,
     'name' : IDL.Text,
@@ -322,6 +345,10 @@ export const idlFactory = ({ IDL }) => {
     'timestamp' : IDL.Int,
     'shippingAddress' : Address,
     'products' : IDL.Vec(Product),
+  });
+  const AnnouncementBanner = IDL.Record({
+    'enabled' : IDL.Bool,
+    'message' : IDL.Text,
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text, 'email' : IDL.Text });
   const ContactForm = IDL.Record({
@@ -430,6 +457,11 @@ export const idlFactory = ({ IDL }) => {
     'deleteCategory' : IDL.Func([IDL.Text], [], []),
     'deleteProduct' : IDL.Func([IDL.Text], [], []),
     'getAllOrders' : IDL.Func([], [IDL.Vec(Order)], ['query']),
+    'getAnnouncementBanner' : IDL.Func(
+        [],
+        [IDL.Opt(AnnouncementBanner)],
+        ['query'],
+      ),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getCategories' : IDL.Func([], [IDL.Vec(Category)], ['query']),
@@ -455,8 +487,10 @@ export const idlFactory = ({ IDL }) => {
     'reorderCategories' : IDL.Func([IDL.Vec(IDL.Text)], [], []),
     'reorderProducts' : IDL.Func([IDL.Vec(IDL.Text)], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'setAnnouncementBanner' : IDL.Func([AnnouncementBanner], [], []),
     'setHeroSection' : IDL.Func([HeroSection], [], []),
     'setProductFeatured' : IDL.Func([IDL.Text, IDL.Bool], [], []),
+    'setProductStatus' : IDL.Func([IDL.Text, ProductStatus], [], []),
     'setShippingRates' : IDL.Func([ShippingRates], [], []),
     'setSocialLinks' : IDL.Func([SocialLinks], [], []),
     'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),

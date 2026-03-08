@@ -2,15 +2,32 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@tanstack/react-router";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { useMemo } from "react";
+import { ProductStatus } from "../backend";
 import { useCart } from "../contexts/CartContext";
+import { useGetProducts } from "../hooks/useProducts";
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, getCartTotal } = useCart();
+  const { data: allProducts = [] } = useGetProducts();
+
+  // Compute upsell suggestions: available products not already in cart, randomly pick up to 3
+  const upsellProducts = useMemo(() => {
+    const cartProductIds = new Set(items.map((item) => item.product.id));
+    const candidates = allProducts.filter(
+      (p) =>
+        (p.status ?? ProductStatus.available) === ProductStatus.available &&
+        !cartProductIds.has(p.id),
+    );
+    // Shuffle and pick up to 3
+    const shuffled = [...candidates].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 3);
+  }, [allProducts, items]);
 
   if (items.length === 0) {
     return (
       <div className="container py-12">
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-4" data-ocid="cart.empty_state">
           <h1 className="text-3xl font-bold">Your Cart is Empty</h1>
           <p className="text-muted-foreground">
             Add some items to get started!
@@ -29,14 +46,17 @@ export default function CartPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
-          {items.map((item) => (
-            <Card key={`${item.product.id}-${item.size}-${item.color}`}>
+          {items.map((item, index) => (
+            <Card
+              key={`${item.product.id}-${item.size}-${item.color}`}
+              data-ocid={`cart.item.${index + 1}`}
+            >
               <CardContent className="p-4">
                 <div className="flex gap-4">
                   <div className="w-24 h-24 rounded-lg overflow-hidden bg-accent/10 flex-shrink-0">
-                    {item.product.images.length > 0 ? (
+                    {item.product.imageUrls.length > 0 ? (
                       <img
-                        src={item.product.images[0].getDirectURL()}
+                        src={item.product.imageUrls[0]}
                         alt={item.product.name}
                         className="w-full h-full object-cover"
                       />
@@ -64,6 +84,7 @@ export default function CartPage() {
                       onClick={() =>
                         removeFromCart(item.product.id, item.size, item.color)
                       }
+                      data-ocid={`cart.delete_button.${index + 1}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -132,8 +153,12 @@ export default function CartPage() {
                   </span>
                 </div>
               </div>
-              <Link to="/checkout">
-                <Button className="w-full" size="lg">
+              <Link to="/payment">
+                <Button
+                  className="w-full"
+                  size="lg"
+                  data-ocid="cart.primary_button"
+                >
                   Proceed to Checkout
                 </Button>
               </Link>
@@ -146,6 +171,47 @@ export default function CartPage() {
           </Card>
         </div>
       </div>
+
+      {/* You might also like upsell section */}
+      {upsellProducts.length > 0 && (
+        <div className="mt-16" data-ocid="cart.section">
+          <h2 className="text-2xl font-bold mb-6">You might also like</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {upsellProducts.map((product, index) => (
+              <Link
+                key={product.id}
+                to="/product/$productId"
+                params={{ productId: product.id }}
+                data-ocid={`cart.item.${items.length + index + 1}`}
+              >
+                <Card className="group overflow-hidden hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+                  <div className="aspect-square overflow-hidden bg-accent/10">
+                    {product.images.length > 0 ? (
+                      <img
+                        src={product.images[0].getDirectURL()}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                        No Image
+                      </div>
+                    )}
+                  </div>
+                  <CardContent className="p-3">
+                    <h3 className="font-medium text-sm mb-1 leading-tight group-hover:text-primary transition-colors line-clamp-1">
+                      {product.name}
+                    </h3>
+                    <p className="text-sm font-bold text-primary">
+                      ${(Number(product.price) / 100).toFixed(2)}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

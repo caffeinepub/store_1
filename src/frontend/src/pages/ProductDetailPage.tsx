@@ -4,7 +4,7 @@ import { Link, useParams } from "@tanstack/react-router";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Size } from "../backend";
+import { ProductStatus, Size } from "../backend";
 import { useCart } from "../contexts/CartContext";
 import { useGetProducts } from "../hooks/useProducts";
 
@@ -30,7 +30,10 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  if (!product) {
+  if (
+    !product ||
+    (product.status ?? ProductStatus.available) === ProductStatus.hidden
+  ) {
     return (
       <div className="container py-12">
         <p className="text-center text-muted-foreground">Product not found</p>
@@ -42,6 +45,9 @@ export default function ProductDetailPage() {
       </div>
     );
   }
+
+  const isSoldOut =
+    (product.status ?? ProductStatus.available) === ProductStatus.soldOut;
 
   const handleAddToCart = () => {
     if (!selectedSize) {
@@ -186,10 +192,21 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          <Button size="lg" className="w-full" onClick={handleAddToCart}>
+          <Button
+            size="lg"
+            className="w-full"
+            onClick={handleAddToCart}
+            disabled={isSoldOut}
+            data-ocid="product.primary_button"
+          >
             <ShoppingCart className="mr-2 h-5 w-5" />
-            Add to Cart
+            {isSoldOut ? "Sold Out" : "Add to Cart"}
           </Button>
+          {isSoldOut && (
+            <p className="text-center text-sm text-muted-foreground">
+              This item is currently out of stock.
+            </p>
+          )}
         </div>
       </div>
     </div>

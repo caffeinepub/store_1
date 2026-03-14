@@ -86,6 +86,32 @@ module {
 
   func buildCheckoutSessionBody(items : [ShoppingItem], allowedCountries : [Text], successUrl : Text, cancelUrl : Text, clientReferenceId : ?Text) : Text {
     let params = List.empty<Text>();
+
+    // Collect shipping address (must come before line items to avoid truncation)
+    var countryIndex = 0;
+    for (country in allowedCountries.vals()) {
+      params.add("shipping_address_collection[allowed_countries][" # countryIndex.toText() # "]=" # urlEncode(country));
+      countryIndex += 1;
+    };
+
+    // Collect billing address
+    params.add("billing_address_collection=required");
+
+    // Collect phone number (required by Printify for fulfillment)
+    params.add("phone_number_collection[enabled]=true");
+
+    // Mode and URLs
+    params.add("mode=payment");
+    params.add("success_url=" # urlEncode(successUrl));
+    params.add("cancel_url=" # urlEncode(cancelUrl));
+
+    // Client reference ID
+    switch (clientReferenceId) {
+      case (?id) { params.add("client_reference_id=" # urlEncode(id)) };
+      case (null) {};
+    };
+
+    // Line items (after all config params)
     var index = 0;
     for (item in items.vals()) {
       let indexText = index.toText();
@@ -96,16 +122,7 @@ module {
       params.add("line_items[" # indexText # "][quantity]=" # item.quantity.toText());
       index += 1;
     };
-    params.add("mode=payment");
-    params.add("success_url=" # urlEncode(successUrl));
-    params.add("cancel_url=" # urlEncode(cancelUrl));
-    for (country in allowedCountries.vals()) {
-      params.add("shipping_address_collection[allowed_countries][0]=" # urlEncode(country));
-    };
-    switch (clientReferenceId) {
-      case (?id) { params.add("client_reference_id=" # urlEncode(id)) };
-      case (null) {};
-    };
+
     params.values().join("&");
   };
 

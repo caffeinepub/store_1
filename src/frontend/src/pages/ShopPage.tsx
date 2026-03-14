@@ -27,20 +27,8 @@ export default function ShopPage() {
       : visibleProducts.filter((p) => p.categoryId === selectedCategory);
 
   return (
-    <div className="relative min-h-[60vh]">
-      {/* Lava lamp background — behind product grid only */}
-      <div
-        className="absolute inset-0 overflow-hidden pointer-events-none"
-        aria-hidden="true"
-      >
-        <div className="lava-blob lava-blob-1" />
-        <div className="lava-blob lava-blob-2" />
-        <div className="lava-blob lava-blob-3" />
-        <div className="lava-blob lava-blob-4" />
-        <div className="lava-blob lava-blob-5" />
-      </div>
-
-      <div className="container py-12 relative z-10">
+    <div className="min-h-[60vh]">
+      <div className="container py-12">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Shop</h1>
           <p className="text-muted-foreground">Browse our collection</p>

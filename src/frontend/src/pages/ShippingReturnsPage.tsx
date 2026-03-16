@@ -8,53 +8,27 @@ export default function ShippingReturnsPage() {
 
       <div className="prose prose-invert max-w-none space-y-6">
         <section>
-          <h2 className="text-2xl font-semibold mb-4">
-            Shipping Rates &amp; Times
-          </h2>
-
-          <h3 className="text-xl font-semibold mb-2 mt-4">United States</h3>
-          <ul className="list-disc list-inside text-muted-foreground space-y-1">
-            <li>
-              Economy — 4–8 business days: $3.99 first item + $2.09 each
-              additional
-            </li>
-            <li>
-              Standard — 2–5 business days: $4.75 first item + $2.40 each
-              additional
-            </li>
-            <li>
-              Express — 2–3 business days: $7.99 first item + $2.40 each
-              additional
-            </li>
+          <h2 className="text-2xl font-semibold mb-4">Shipping</h2>
+          <p className="text-muted-foreground">
+            We offer{" "}
+            <strong className="text-foreground">free worldwide shipping</strong>{" "}
+            on all orders. Estimated delivery times are as follows:
+          </p>
+          <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-3">
+            <li>United States — 2–8 business days</li>
+            <li>Canada — 10–30 business days</li>
+            <li>Australia — 10–30 business days</li>
+            <li>Rest of World — 10–30 business days</li>
           </ul>
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-sm text-muted-foreground mt-3">
             * Shipments to Alaska, Hawaii, Puerto Rico, and unincorporated US
             territories may take an additional 7–12 business days.
           </p>
-
-          <h3 className="text-xl font-semibold mb-2 mt-4">Canada</h3>
-          <ul className="list-disc list-inside text-muted-foreground space-y-1">
-            <li>
-              Standard — 10–30 business days: $9.39 first item + $4.39 each
-              additional
-            </li>
-          </ul>
-
-          <h3 className="text-xl font-semibold mb-2 mt-4">Australia</h3>
-          <ul className="list-disc list-inside text-muted-foreground space-y-1">
-            <li>
-              Standard — 10–30 business days: $12.49 first item + $4.99 each
-              additional
-            </li>
-          </ul>
-
-          <h3 className="text-xl font-semibold mb-2 mt-4">Rest of World</h3>
-          <ul className="list-disc list-inside text-muted-foreground space-y-1">
-            <li>
-              Standard — 10–30 business days: $10.00 first item + $4.00 each
-              additional
-            </li>
-          </ul>
+          <p className="text-sm text-muted-foreground mt-2">
+            Delivery times are estimates and not guaranteed. Delays may occur
+            due to carrier issues, customs processing, or other factors outside
+            our control.
+          </p>
         </section>
 
         <section>

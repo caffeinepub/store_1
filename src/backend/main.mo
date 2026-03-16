@@ -66,13 +66,30 @@ actor {
     itemPrice : Nat;
   };
 
-  public type ShippingRates = {
+  // Legacy stable type kept for upgrade compatibility — do not remove
+  type ShippingRates_v1 = {
     usStandard : Nat;
     usExpress : Nat;
     usOvernight : Nat;
     canada : Nat;
     australia : Nat;
     restOfWorld : Nat;
+  };
+
+  // Current per-item shipping rates type
+  public type ShippingRates = {
+    usEconomyBase : Nat;
+    usEconomyPerItem : Nat;
+    usStandardBase : Nat;
+    usStandardPerItem : Nat;
+    usExpressBase : Nat;
+    usExpressPerItem : Nat;
+    canadaBase : Nat;
+    canadaPerItem : Nat;
+    australiaBase : Nat;
+    australiaPerItem : Nat;
+    restOfWorldBase : Nat;
+    restOfWorldPerItem : Nat;
   };
 
   public type Address = {
@@ -132,6 +149,30 @@ actor {
     enabled : Bool;
   };
 
+  // Comprehensive list of Stripe-supported shipping countries
+  let allShippingCountries : [Text] = [
+    "AC", "AD", "AE", "AF", "AG", "AI", "AL", "AM", "AO", "AQ", "AR", "AT",
+    "AU", "AW", "AX", "AZ", "BA", "BB", "BD", "BE", "BF", "BG", "BH", "BI",
+    "BJ", "BL", "BM", "BN", "BO", "BQ", "BR", "BS", "BT", "BV", "BW", "BY",
+    "BZ", "CA", "CD", "CF", "CG", "CH", "CI", "CK", "CL", "CM", "CN", "CO",
+    "CR", "CV", "CW", "CY", "CZ", "DE", "DJ", "DK", "DM", "DO", "DZ", "EC",
+    "EE", "EG", "EH", "ER", "ES", "ET", "FI", "FJ", "FK", "FO", "FR", "GA",
+    "GB", "GD", "GE", "GF", "GG", "GH", "GI", "GL", "GM", "GN", "GP", "GQ",
+    "GR", "GS", "GT", "GU", "GW", "GY", "HK", "HN", "HR", "HT", "HU", "ID",
+    "IE", "IL", "IM", "IN", "IO", "IQ", "IS", "IT", "JE", "JM", "JO", "JP",
+    "KE", "KG", "KH", "KI", "KM", "KN", "KR", "KW", "KY", "KZ", "LA", "LB",
+    "LC", "LI", "LK", "LR", "LS", "LT", "LU", "LV", "LY", "MA", "MC", "MD",
+    "ME", "MF", "MG", "MK", "ML", "MM", "MN", "MO", "MQ", "MR", "MS", "MT",
+    "MU", "MV", "MW", "MX", "MY", "MZ", "NA", "NC", "NE", "NG", "NI", "NL",
+    "NO", "NP", "NR", "NU", "NZ", "OM", "PA", "PE", "PF", "PG", "PH", "PK",
+    "PL", "PM", "PN", "PR", "PS", "PT", "PW", "PY", "QA", "RE", "RO", "RS",
+    "RU", "RW", "SA", "SB", "SC", "SE", "SG", "SH", "SI", "SJ", "SK", "SL",
+    "SM", "SN", "SO", "SR", "SS", "ST", "SV", "SX", "SZ", "TA", "TC", "TD",
+    "TF", "TG", "TH", "TJ", "TK", "TL", "TM", "TN", "TO", "TR", "TT", "TV",
+    "TW", "TZ", "UA", "UG", "US", "UY", "UZ", "VA", "VC", "VE", "VG", "VN",
+    "VU", "WF", "WS", "XK", "YE", "YT", "ZA", "ZM", "ZW"
+  ];
+
   // Storage
   let products = Map.empty<Text, Product>();
   let categories = Map.empty<Text, Category>();
@@ -139,17 +180,36 @@ actor {
   let contactForms = Map.empty<Text, ContactForm>();
   let userProfiles = Map.empty<Principal, UserProfile>();
   let newsletterSubscribers = Map.empty<Text, NewsletterSubscriber>();
+  // Separate stable map for bullet points — avoids breaking Product stable type
+  let productBulletPoints = Map.empty<Text, [Text]>();
 
   var heroSection : ?HeroSection = null;
   var socialLinks : ?SocialLinks = null;
 
-  var shippingRates : ShippingRates = {
+  // Legacy stable variable — kept to satisfy upgrade compatibility checker
+  var shippingRates : ShippingRates_v1 = {
     usStandard = 0;
     usExpress = 0;
     usOvernight = 0;
     canada = 0;
     australia = 0;
     restOfWorld = 0;
+  };
+
+  // New per-item shipping rates — all active code uses this
+  var shippingRatesV2 : ShippingRates = {
+    usEconomyBase = 399;
+    usEconomyPerItem = 209;
+    usStandardBase = 475;
+    usStandardPerItem = 240;
+    usExpressBase = 799;
+    usExpressPerItem = 240;
+    canadaBase = 939;
+    canadaPerItem = 439;
+    australiaBase = 1249;
+    australiaPerItem = 499;
+    restOfWorldBase = 1000;
+    restOfWorldPerItem = 400;
   };
 
   var announcementBanner : ?AnnouncementBanner = null;
@@ -167,7 +227,7 @@ actor {
     };
   };
 
-  // User profile endpoints - accessible by any authenticated (non-anonymous) user
+  // User profile endpoints
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can access profiles");
@@ -205,10 +265,8 @@ actor {
     categories.remove(id);
   };
 
-  // iterate over the categories map and update the
   public shared ({ caller }) func reorderCategories(orderedIds : [Text]) : async () {
     assertHasAdminPermission(caller);
-
     for ((index, id) in orderedIds.enumerate()) {
       switch (categories.get(id)) {
         case (?category) {
@@ -243,11 +301,11 @@ actor {
   public shared ({ caller }) func deleteProduct(id : Text) : async () {
     assertHasAdminPermission(caller);
     products.remove(id);
+    productBulletPoints.remove(id);
   };
 
   public shared ({ caller }) func reorderProducts(orderedIds : [Text]) : async () {
     assertHasAdminPermission(caller);
-
     for ((index, id) in orderedIds.enumerate()) {
       switch (products.get(id)) {
         case (?product) {
@@ -274,7 +332,6 @@ actor {
 
   public shared ({ caller }) func setProductFeatured(id : Text, featured : Bool) : async () {
     assertHasAdminPermission(caller);
-
     switch (products.get(id)) {
       case (?product) {
         let updatedProduct : Product = {
@@ -299,7 +356,6 @@ actor {
 
   public shared ({ caller }) func setProductStatus(id : Text, status : ProductStatus) : async () {
     assertHasAdminPermission(caller);
-
     switch (products.get(id)) {
       case (?product) {
         let updatedProduct : Product = {
@@ -326,23 +382,55 @@ actor {
     products.values().toArray();
   };
 
-  public query func calculateShipping(destination : Text, productList : [Product]) : async Nat {
-    let _weight = productList.foldLeft(0, func(acc, p) { acc + p.weight });
-
-    let shipping : Nat = switch (destination) {
-      case ("US") { 399 + productList.size() * 209 };
-      case ("Canada") { 939 + productList.size() * 439 };
-      case ("Australia") { 1249 + productList.size() * 499 };
-      case (_) { 1000 + productList.size() * 400 };
-    };
-
-    shipping;
+  // Bullet points — stored separately from Product to preserve stable type compatibility
+  public shared ({ caller }) func setProductBulletPoints(id : Text, points : [Text]) : async () {
+    assertHasAdminPermission(caller);
+    productBulletPoints.add(id, points);
   };
 
-  // Orders - any caller including guests can create an order
+  public query func getProductBulletPoints(id : Text) : async [Text] {
+    switch (productBulletPoints.get(id)) {
+      case (?points) { points };
+      case (null) { [] };
+    };
+  };
+
+  public query func getAllProductBulletPoints() : async [(Text, [Text])] {
+    productBulletPoints.entries().toArray();
+  };
+
+  // Calculate shipping cost in cents
+  public query func calculateShipping(destination : Text, method : Text, itemCount : Nat) : async Nat {
+    let additionalItems : Nat = if (itemCount > 0) { itemCount - 1 } else { 0 };
+    switch (destination) {
+      case ("US") {
+        switch (method) {
+          case ("express") {
+            shippingRatesV2.usExpressBase + additionalItems * shippingRatesV2.usExpressPerItem;
+          };
+          case ("standard") {
+            shippingRatesV2.usStandardBase + additionalItems * shippingRatesV2.usStandardPerItem;
+          };
+          case (_) {
+            shippingRatesV2.usEconomyBase + additionalItems * shippingRatesV2.usEconomyPerItem;
+          };
+        };
+      };
+      case ("CA") {
+        shippingRatesV2.canadaBase + additionalItems * shippingRatesV2.canadaPerItem;
+      };
+      case ("AU") {
+        shippingRatesV2.australiaBase + additionalItems * shippingRatesV2.australiaPerItem;
+      };
+      case (_) {
+        shippingRatesV2.restOfWorldBase + additionalItems * shippingRatesV2.restOfWorldPerItem;
+      };
+    };
+  };
+
+  // Orders
   public shared ({ caller }) func createOrder(productList : [Product], total : Nat, shippingAddress : Address, shippingOption : ShippingOption) : async ?Order {
     let orderId = "ORDER-" # (orders.size() + 1001).toText();
-
     let order : Order = {
       id = orderId;
       userId = caller;
@@ -360,7 +448,6 @@ actor {
 
   public shared ({ caller }) func updateOrderStatus(orderId : Text, status : Text) : async () {
     assertHasAdminPermission(caller);
-
     switch (orders.get(orderId)) {
       case (?order) {
         let updatedOrder : Order = {
@@ -382,7 +469,6 @@ actor {
 
   public shared ({ caller }) func updateOrderCost(orderId : Text, cost : Nat) : async () {
     assertHasAdminPermission(caller);
-
     switch (orders.get(orderId)) {
       case (?order) {
         let updatedOrder : Order = {
@@ -405,16 +491,12 @@ actor {
   public query ({ caller }) func getOrder(id : Text) : async ?Order {
     switch (orders.get(id)) {
       case (?order) {
-        // Admins can view any order
         if (AccessControl.isAdmin(accessControlState, caller)) {
           return ?order;
         };
-
-        // Authenticated users can only view their own orders
         if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
           Runtime.trap("Unauthorized: Only authenticated users can view orders");
         };
-
         if (order.userId == caller) {
           ?order;
         } else {
@@ -430,7 +512,7 @@ actor {
     orders.values().toArray();
   };
 
-  // Contact Forms - Public endpoint for website visitors
+  // Contact Forms
   public shared func submitContactForm(form : ContactForm) : async () {
     contactForms.add(form.timestamp.toText(), form);
   };
@@ -455,7 +537,13 @@ actor {
   func getStripeConfiguration() : Stripe.StripeConfiguration {
     switch (stripeConfig) {
       case (null) { Runtime.trap("Stripe needs to be first configured") };
-      case (?config) { config };
+      case (?config) {
+        // Always use the full comprehensive country list
+        {
+          secretKey = config.secretKey;
+          allowedCountries = allShippingCountries;
+        };
+      };
     };
   };
 
@@ -463,12 +551,10 @@ actor {
     OutCall.transform(input);
   };
 
-  // Allows both authenticated users and guests to checkout
   public shared ({ caller }) func createCheckoutSession(items : [Stripe.ShoppingItem], successUrl : Text, cancelUrl : Text) : async Text {
     await Stripe.createCheckoutSession(getStripeConfiguration(), caller, items, successUrl, cancelUrl, transform);
   };
 
-  // Allows both authenticated users and guests to check session status
   public shared ({ caller }) func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
     await Stripe.getSessionStatus(getStripeConfiguration(), sessionId, transform);
   };
@@ -492,7 +578,7 @@ actor {
     socialLinks;
   };
 
-  // Newsletter Subscribers - Public endpoint for website visitors
+  // Newsletter
   public shared func subscribeToNewsletter(email : Text) : async () {
     if (newsletterSubscribers.get(email) != null) {
       Runtime.trap("Email already subscribed");
@@ -509,14 +595,14 @@ actor {
     newsletterSubscribers.values().toArray();
   };
 
-  // Shipping Rates/Admin Config
+  // Shipping Rates — uses shippingRatesV2
   public shared ({ caller }) func setShippingRates(rates : ShippingRates) : async () {
     assertHasAdminPermission(caller);
-    shippingRates := rates;
+    shippingRatesV2 := rates;
   };
 
   public query func getShippingRates() : async ShippingRates {
-    shippingRates;
+    shippingRatesV2;
   };
 
   // Announcement Banner

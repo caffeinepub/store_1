@@ -3,7 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, CreditCard, Loader2, ShoppingBag } from "lucide-react";
+import {
+  ArrowLeft,
+  CreditCard,
+  Loader2,
+  Package,
+  ShoppingBag,
+  Truck,
+} from "lucide-react";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import type { ShoppingItem } from "../backend";
@@ -21,21 +28,19 @@ export default function PaymentPage() {
     }
   }, [items, navigate]);
 
-  if (items.length === 0) {
-    return null;
-  }
+  if (items.length === 0) return null;
 
   const handlePayment = async () => {
     try {
-      const shoppingItems: ShoppingItem[] = items.map((item) => ({
+      const productItems: ShoppingItem[] = items.map((item) => ({
         productName: item.product.name,
         productDescription: `Size: ${item.size} | Color: ${item.color}`,
         priceInCents: BigInt(item.product.price),
         quantity: BigInt(item.quantity),
-        currency: "USD",
+        currency: "usd",
       }));
 
-      const session = await createCheckoutSession.mutateAsync(shoppingItems);
+      const session = await createCheckoutSession.mutateAsync(productItems);
 
       if (!session?.url) {
         throw new Error("Stripe session missing url");
@@ -55,7 +60,6 @@ export default function PaymentPage() {
   return (
     <div className="container py-12">
       <div className="max-w-lg mx-auto">
-        {/* Back button */}
         <Link to="/cart" data-ocid="payment.link">
           <Button variant="ghost" className="mb-6 -ml-2">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -82,7 +86,6 @@ export default function PaymentPage() {
                   className="flex gap-4 items-start"
                   data-ocid={`payment.item.${index + 1}`}
                 >
-                  {/* Thumbnail */}
                   <div className="w-16 h-16 rounded-md overflow-hidden bg-accent/10 flex-shrink-0 border border-border">
                     {item.product.imageUrls.length > 0 ? (
                       <img
@@ -97,7 +100,6 @@ export default function PaymentPage() {
                     )}
                   </div>
 
-                  {/* Details */}
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm leading-tight truncate">
                       {item.product.name}
@@ -117,7 +119,6 @@ export default function PaymentPage() {
                     </div>
                   </div>
 
-                  {/* Price */}
                   <div className="text-right flex-shrink-0">
                     <p className="font-bold text-primary">
                       ${((item.product.price * item.quantity) / 100).toFixed(2)}
@@ -143,28 +144,31 @@ export default function PaymentPage() {
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Shipping</span>
-                <span className="text-muted-foreground italic">
-                  Calculated at checkout
+                <span className="text-muted-foreground flex items-center gap-1.5">
+                  <Truck className="h-3.5 w-3.5" />
+                  Shipping
+                </span>
+                <span className="font-medium text-green-400 flex items-center gap-1">
+                  <Package className="h-3.5 w-3.5" />
+                  Free
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Taxes</span>
-                <span className="text-muted-foreground italic">
-                  Calculated at checkout
+              <div className="flex justify-between text-sm font-bold border-t border-border pt-2">
+                <span>Total</span>
+                <span className="text-primary">
+                  ${(subtotal / 100).toFixed(2)}
                 </span>
               </div>
             </div>
 
             <Separator />
 
-            {/* Stripe note */}
             <p className="text-xs text-muted-foreground text-center">
-              You'll complete your purchase on Stripe's secure checkout page,
-              where shipping and taxes will be calculated based on your address.
+              You'll complete your purchase on Stripe's secure checkout page.
+              Name, email, full shipping &amp; billing address, and phone number
+              are collected there.
             </p>
 
-            {/* Pay button */}
             <Button
               onClick={handlePayment}
               disabled={createCheckoutSession.isPending}
@@ -180,16 +184,13 @@ export default function PaymentPage() {
               ) : (
                 <>
                   <CreditCard className="mr-2 h-5 w-5" />
-                  Pay with Stripe
+                  Pay ${(subtotal / 100).toFixed(2)} with Stripe
                 </>
               )}
             </Button>
 
             {createCheckoutSession.isPending && (
-              <p
-                className="text-xs text-muted-foreground text-center animate-pulse"
-                data-ocid="payment.loading_state"
-              >
+              <p className="text-xs text-muted-foreground text-center animate-pulse">
                 Setting up your secure payment session...
               </p>
             )}

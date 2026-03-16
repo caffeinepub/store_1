@@ -1,3 +1,4 @@
+import SizeGuideModal from "@/components/SizeGuideModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link, useParams } from "@tanstack/react-router";
@@ -6,7 +7,10 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { ProductStatus, Size } from "../backend";
 import { useCart } from "../contexts/CartContext";
-import { useGetProducts } from "../hooks/useProducts";
+import {
+  useGetAllProductBulletPoints,
+  useGetProducts,
+} from "../hooks/useProducts";
 
 const sizeOptions: Size[] = [
   Size.S,
@@ -22,6 +26,7 @@ const sizeOptions: Size[] = [
 export default function ProductDetailPage() {
   const { productId } = useParams({ from: "/product/$productId" });
   const { data: products = [] } = useGetProducts();
+  const { data: bulletPointsMap = [] } = useGetAllProductBulletPoints();
   const product = products.find((p) => p.id === productId);
   const { addToCart } = useCart();
 
@@ -46,6 +51,9 @@ export default function ProductDetailPage() {
     );
   }
 
+  const bulletPoints =
+    bulletPointsMap.find(([id]) => id === product.id)?.[1] ?? [];
+
   const isSoldOut =
     (product.status ?? ProductStatus.available) === ProductStatus.soldOut;
 
@@ -67,6 +75,21 @@ export default function ProductDetailPage() {
     );
     toast.success("Added to cart!");
   };
+
+  // Recommendations: same category first, then pad with others
+  const recommendations = (() => {
+    const available = products.filter(
+      (p) =>
+        p.id !== product.id &&
+        (p.status ?? ProductStatus.available) === ProductStatus.available,
+    );
+    const sameCategory = available.filter(
+      (p) => p.categoryId === product.categoryId,
+    );
+    const others = available.filter((p) => p.categoryId !== product.categoryId);
+    const shuffledOthers = [...others].sort(() => Math.random() - 0.5);
+    return [...sameCategory, ...shuffledOthers].slice(0, 4);
+  })();
 
   return (
     <div className="container py-12">
@@ -127,7 +150,26 @@ export default function ProductDetailPage() {
             </p>
           </div>
 
-          <p className="text-muted-foreground">{product.description}</p>
+          {/* Details: description + bullet points + size guide */}
+          <div className="space-y-3">
+            <p className="text-muted-foreground leading-relaxed">
+              {product.description}
+            </p>
+            {bulletPoints.length > 0 && (
+              <ul className="space-y-1.5">
+                {bulletPoints.map((point) => (
+                  <li
+                    key={point}
+                    className="flex items-start gap-2 text-sm text-muted-foreground"
+                  >
+                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <SizeGuideModal />
+          </div>
 
           {/* Size Selection */}
           {product.sizes.length > 0 && (
@@ -209,6 +251,47 @@ export default function ProductDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Product Recommendations */}
+      {recommendations.length > 0 && (
+        <div className="mt-20" data-ocid="product.section">
+          <h2 className="text-2xl font-bold mb-6">You might also like</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {recommendations.map((rec, index) => (
+              <Link
+                key={rec.id}
+                to="/product/$productId"
+                params={{ productId: rec.id }}
+                data-ocid={`product.item.${index + 1}`}
+              >
+                <Card className="group overflow-hidden hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+                  <div className="aspect-square overflow-hidden bg-accent/10">
+                    {rec.images.length > 0 ? (
+                      <img
+                        src={rec.images[0].getDirectURL()}
+                        alt={rec.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                        No Image
+                      </div>
+                    )}
+                  </div>
+                  <CardContent className="p-3">
+                    <h3 className="font-medium text-sm mb-1 leading-tight group-hover:text-primary transition-colors line-clamp-1">
+                      {rec.name}
+                    </h3>
+                    <p className="text-sm font-bold text-primary">
+                      ${(Number(rec.price) / 100).toFixed(2)}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

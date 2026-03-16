@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@tanstack/react-router";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Minus, Package, Plus, Trash2, Truck } from "lucide-react";
 import { useMemo } from "react";
 import { ProductStatus } from "../backend";
 import { useCart } from "../contexts/CartContext";
@@ -19,7 +19,6 @@ export default function CartPage() {
         (p.status ?? ProductStatus.available) === ProductStatus.available &&
         !cartProductIds.has(p.id),
     );
-    // Shuffle and pick up to 3
     const shuffled = [...candidates].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, 3);
   }, [allProducts, items]);
@@ -140,9 +139,15 @@ export default function CartPage() {
                     ${(getCartTotal() / 100).toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Shipping</span>
-                  <span>Calculated at checkout</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <Truck className="h-3.5 w-3.5" />
+                    Shipping
+                  </span>
+                  <span className="font-medium text-green-400 flex items-center gap-1">
+                    <Package className="h-3.5 w-3.5" />
+                    Free
+                  </span>
                 </div>
               </div>
               <div className="border-t pt-4">
@@ -162,7 +167,7 @@ export default function CartPage() {
                   Proceed to Checkout
                 </Button>
               </Link>
-              <Link to="/shop">
+              <Link to="/shop" className="block mt-2">
                 <Button variant="outline" className="w-full">
                   Continue Shopping
                 </Button>

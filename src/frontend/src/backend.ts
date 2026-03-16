@@ -103,6 +103,7 @@ export interface Product {
     order: bigint;
     name: string;
     description: string;
+    bulletPoints: Array<string>;
     sizes: Array<Size>;
     colors: Array<Color>;
     price: bigint;

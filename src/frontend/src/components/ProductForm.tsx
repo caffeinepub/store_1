@@ -20,7 +20,11 @@ import {
   ProductStatus,
   Size,
 } from "../backend";
-import { useAddProduct, useUpdateProduct } from "../hooks/useProducts";
+import {
+  useAddProduct,
+  useSetProductBulletPoints,
+  useUpdateProduct,
+} from "../hooks/useProducts";
 
 interface ProductFormProps {
   product?: Product | null;
@@ -40,6 +44,14 @@ const SIZES: Size[] = [
   Size.XXXXXL,
 ];
 
+type IdValue = { id: string; value: string };
+
+let idCounter = 0;
+const newId = () => `id-${++idCounter}`;
+
+const toIdValues = (arr: string[]): IdValue[] =>
+  arr.map((value) => ({ id: newId(), value }));
+
 export default function ProductForm({
   product,
   categories,
@@ -48,10 +60,11 @@ export default function ProductForm({
 }: ProductFormProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [bulletPoints, setBulletPoints] = useState<IdValue[]>([]);
   const [price, setPrice] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [selectedSizes, setSelectedSizes] = useState<Size[]>([]);
-  const [colors, setColors] = useState<string[]>([""]);
+  const [colors, setColors] = useState<IdValue[]>([{ id: newId(), value: "" }]);
   const [images, setImages] = useState<ExternalBlob[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState<{
@@ -62,15 +75,21 @@ export default function ProductForm({
 
   const addProduct = useAddProduct();
   const updateProduct = useUpdateProduct();
+  const setProductBulletPoints = useSetProductBulletPoints();
 
   useEffect(() => {
     if (product) {
       setName(product.name);
       setDescription(product.description);
+      setBulletPoints([]);
       setPrice((Number(product.price) / 100).toString());
       setCategoryId(product.categoryId);
       setSelectedSizes(product.sizes);
-      setColors(product.colors.length > 0 ? product.colors : [""]);
+      setColors(
+        product.colors.length > 0
+          ? toIdValues(product.colors)
+          : [{ id: newId(), value: "" }],
+      );
       setImages(product.images);
       setFeatured(product.featured ?? false);
       setStatus(product.status ?? ProductStatus.available);
@@ -97,15 +116,29 @@ export default function ProductForm({
   };
 
   const addColor = () => {
-    setColors((prev) => [...prev, ""]);
+    setColors((prev) => [...prev, { id: newId(), value: "" }]);
   };
 
-  const updateColor = (index: number, value: string) => {
-    setColors((prev) => prev.map((c, i) => (i === index ? value : c)));
+  const updateColor = (id: string, value: string) => {
+    setColors((prev) => prev.map((c) => (c.id === id ? { ...c, value } : c)));
   };
 
-  const removeColor = (index: number) => {
-    setColors((prev) => prev.filter((_, i) => i !== index));
+  const removeColor = (id: string) => {
+    setColors((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const addBulletPoint = () => {
+    setBulletPoints((prev) => [...prev, { id: newId(), value: "" }]);
+  };
+
+  const updateBulletPoint = (id: string, value: string) => {
+    setBulletPoints((prev) =>
+      prev.map((b) => (b.id === id ? { ...b, value } : b)),
+    );
+  };
+
+  const removeBulletPoint = (id: string) => {
+    setBulletPoints((prev) => prev.filter((b) => b.id !== id));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -122,11 +155,17 @@ export default function ProductForm({
       return;
     }
 
-    const filteredColors = colors.filter((c) => c.trim() !== "");
+    const filteredColors = colors
+      .map((c) => c.value)
+      .filter((c) => c.trim() !== "");
     if (filteredColors.length === 0) {
       toast.error("Please add at least one color");
       return;
     }
+
+    const filteredBulletPoints = bulletPoints
+      .map((b) => b.value)
+      .filter((b) => b.trim() !== "");
 
     try {
       // Upload new image files
@@ -149,24 +188,35 @@ export default function ProductForm({
         id: product?.id || `product-${Date.now()}`,
         name: name.trim(),
         description: description.trim(),
+        // Keep for backward compat with backend.ts type — bullet points are
+        // saved separately via setProductBulletPoints after the product save.
+        bulletPoints: filteredBulletPoints,
         price: BigInt(Math.round(Number.parseFloat(price) * 100)),
         images: allImages,
         sizes: selectedSizes,
         colors: filteredColors,
         categoryId,
-        weight: BigInt(500), // Default weight in grams
+        weight: BigInt(500),
         order: product?.order || BigInt(0),
         featured: featured,
         status: status,
       };
 
+      let savedId: string;
       if (product) {
         await updateProduct.mutateAsync(productData);
+        savedId = productData.id;
         toast.success("Product updated successfully");
       } else {
         await addProduct.mutateAsync(productData);
+        savedId = productData.id;
         toast.success("Product added successfully");
       }
+
+      await setProductBulletPoints.mutateAsync({
+        id: savedId,
+        points: filteredBulletPoints,
+      });
 
       onSuccess();
     } catch (error) {
@@ -175,7 +225,10 @@ export default function ProductForm({
     }
   };
 
-  const isLoading = addProduct.isPending || updateProduct.isPending;
+  const isLoading =
+    addProduct.isPending ||
+    updateProduct.isPending ||
+    setProductBulletPoints.isPending;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -200,6 +253,30 @@ export default function ProductForm({
           rows={4}
           required
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Product Details (bullet points)</Label>
+        {bulletPoints.map((bp) => (
+          <div key={bp.id} className="flex gap-2">
+            <Input
+              value={bp.value}
+              onChange={(e) => updateBulletPoint(bp.id, e.target.value)}
+              placeholder="e.g. 100% cotton, machine washable"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => removeBulletPoint(bp.id)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+        <Button type="button" variant="outline" onClick={addBulletPoint}>
+          Add bullet point
+        </Button>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -254,11 +331,11 @@ export default function ProductForm({
 
       <div className="space-y-2">
         <Label>Colors *</Label>
-        {colors.map((color, index) => (
-          <div key={`color-${index}-${color}`} className="flex gap-2">
+        {colors.map((color) => (
+          <div key={color.id} className="flex gap-2">
             <Input
-              value={color}
-              onChange={(e) => updateColor(index, e.target.value)}
+              value={color.value}
+              onChange={(e) => updateColor(color.id, e.target.value)}
               placeholder="Enter color name"
             />
             {colors.length > 1 && (
@@ -266,7 +343,7 @@ export default function ProductForm({
                 type="button"
                 variant="outline"
                 size="icon"
-                onClick={() => removeColor(index)}
+                onClick={() => removeColor(color.id)}
               >
                 <X className="h-4 w-4" />
               </Button>

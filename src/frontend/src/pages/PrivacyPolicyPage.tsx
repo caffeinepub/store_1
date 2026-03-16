@@ -13,8 +13,9 @@ export default function PrivacyPolicyPage() {
           </h2>
           <p className="text-muted-foreground">
             SKR Lab collects information you provide when making a purchase,
-            including your name, email address, and shipping address. This
-            information is used solely to process and fulfill your order.
+            including your name, email address, shipping address, billing
+            address, and phone number. This information is used solely to
+            process and fulfill your order.
           </p>
         </section>
 
@@ -32,9 +33,22 @@ export default function PrivacyPolicyPage() {
         <section>
           <h2 className="text-2xl font-semibold mb-4">3. Payment Processing</h2>
           <p className="text-muted-foreground">
-            Payment information is processed securely by Stripe. SKR Lab does
-            not store your complete payment card information. Stripe maintains
-            PCI-DSS compliance to ensure your payment data is handled securely.
+            Payment information is processed securely by Stripe. When you check
+            out, Stripe receives your name, email address, shipping address,
+            billing address, phone number, and payment card details in order to
+            complete your purchase. SKR Lab does not store your complete payment
+            card information. Stripe maintains PCI-DSS compliance to ensure your
+            payment data is handled securely. Stripe&apos;s handling of your
+            data is governed by their{" "}
+            <a
+              href="https://stripe.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-primary transition-colors"
+            >
+              Privacy Policy
+            </a>
+            .
           </p>
         </section>
 

@@ -168,6 +168,7 @@ export interface backendInterface {
     deleteCategory(id: string): Promise<void>;
     deleteProduct(id: string): Promise<void>;
     getAllOrders(): Promise<Array<Order>>;
+    getAllProductBulletPoints(): Promise<Array<[string, Array<string>]>>;
     getAnnouncementBanner(): Promise<AnnouncementBanner | null>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
@@ -176,6 +177,7 @@ export interface backendInterface {
     getHeroSection(): Promise<HeroSection | null>;
     getNewsletterSubscribers(): Promise<Array<NewsletterSubscriber>>;
     getOrder(id: string): Promise<Order | null>;
+    getProductBulletPoints(id: string): Promise<Array<string>>;
     getProducts(): Promise<Array<Product>>;
     getShippingRates(): Promise<ShippingRates>;
     getSocialLinks(): Promise<SocialLinks | null>;
@@ -188,6 +190,7 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setAnnouncementBanner(banner: AnnouncementBanner): Promise<void>;
     setHeroSection(section: HeroSection): Promise<void>;
+    setProductBulletPoints(id: string, points: Array<string>): Promise<void>;
     setProductFeatured(id: string, featured: boolean): Promise<void>;
     setProductStatus(id: string, status: ProductStatus): Promise<void>;
     setShippingRates(rates: ShippingRates): Promise<void>;

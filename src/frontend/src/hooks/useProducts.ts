@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AnnouncementBanner, Product } from "../backend";
 import { ProductStatus } from "../backend";
+import type { backendInterface as BackendInterface } from "../backend.d";
 import { useActor } from "./useActor";
 
 export function useGetProducts() {
@@ -138,6 +139,28 @@ export function useSetProductStatus() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+}
+
+export function useGetAllProductBulletPoints() {
+  const { actor } = useActor();
+  return useQuery({
+    queryKey: ["productBulletPoints"],
+    queryFn: () =>
+      (actor as unknown as BackendInterface).getAllProductBulletPoints(),
+    enabled: !!actor,
+  });
+}
+
+export function useSetProductBulletPoints() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, points }: { id: string; points: string[] }) =>
+      (actor as unknown as BackendInterface).setProductBulletPoints(id, points),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["productBulletPoints"] });
     },
   });
 }

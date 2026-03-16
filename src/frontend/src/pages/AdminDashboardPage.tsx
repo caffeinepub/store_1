@@ -23,10 +23,8 @@ export default function AdminDashboardPage() {
 
   const isAuthenticated = !!identity;
 
-  // Only run admin check after user has authenticated
   const { isAdmin, isLoading: adminCheckLoading, isFetched } = useAdminCheck();
 
-  // Not authenticated (or still initializing) — always show login button first
   if (!isAuthenticated) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center px-4">
@@ -51,7 +49,6 @@ export default function AdminDashboardPage() {
     );
   }
 
-  // Authenticated but still verifying admin privileges
   if (adminCheckLoading || !isFetched) {
     return (
       <div className="container py-20 flex items-center justify-center">
@@ -63,7 +60,6 @@ export default function AdminDashboardPage() {
     );
   }
 
-  // Authenticated but not an admin
   if (!isAdmin) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center px-4">
@@ -91,7 +87,6 @@ export default function AdminDashboardPage() {
     );
   }
 
-  // Admin dashboard
   return (
     <div className="container py-12">
       <div className="flex justify-between items-center mb-8">

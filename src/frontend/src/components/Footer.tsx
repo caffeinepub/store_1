@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "@tanstack/react-router";
+import { Lock } from "lucide-react";
 import { useState } from "react";
 import {
   SiInstagram,
@@ -148,8 +149,20 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-border/40 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} SKR Lab. All rights reserved.</p>
+        <div className="mt-8 pt-8 border-t border-border/40 text-center space-y-3">
+          <p className="text-sm text-muted-foreground">
+            &copy; {new Date().getFullYear()} SKR Lab. All rights reserved.
+          </p>
+          <div className="flex items-center justify-center gap-1.5 text-muted-foreground/50">
+            <Lock className="h-3 w-3" />
+            <span className="text-xs">Payments secured by</span>
+            <span
+              className="text-xs font-semibold tracking-wide"
+              style={{ color: "#635BFF" }}
+            >
+              Stripe
+            </span>
+          </div>
         </div>
       </div>
     </footer>

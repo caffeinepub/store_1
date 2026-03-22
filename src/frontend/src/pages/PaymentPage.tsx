@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   CreditCard,
   Loader2,
+  Lock,
   Package,
   ShoppingBag,
   Truck,
@@ -163,11 +164,17 @@ export default function PaymentPage() {
 
             <Separator />
 
-            <p className="text-xs text-muted-foreground text-center">
-              You'll complete your purchase on Stripe's secure checkout page.
-              Name, email, full shipping &amp; billing address, and phone number
-              are collected there.
-            </p>
+            {/* Stripe trust badge */}
+            <div className="flex items-center justify-center gap-1.5 text-muted-foreground/60">
+              <Lock className="h-3 w-3" />
+              <span className="text-xs">Secured by</span>
+              <span
+                className="text-xs font-semibold tracking-wide"
+                style={{ color: "#635BFF" }}
+              >
+                Stripe
+              </span>
+            </div>
 
             <Button
               onClick={handlePayment}

@@ -87,18 +87,16 @@ module {
   func buildCheckoutSessionBody(items : [ShoppingItem], allowedCountries : [Text], successUrl : Text, cancelUrl : Text, clientReferenceId : ?Text) : Text {
     let params = List.empty<Text>();
 
-    // Always collect billing address (includes name field)
+    // Billing and phone collection — must come before line items to avoid truncation
     params.add("billing_address_collection=required");
+    params.add("phone_number_collection[enabled]=true");
 
-    // Collect shipping address from every customer with incrementing country index
+    // Shipping address collection with properly incremented country indexes
     var countryIndex = 0;
     for (country in allowedCountries.vals()) {
       params.add("shipping_address_collection[allowed_countries][" # countryIndex.toText() # "]=" # urlEncode(country));
       countryIndex += 1;
     };
-
-    // Always collect phone number (required by Printify)
-    params.add("phone_number_collection[enabled]=true");
 
     // Line items
     var index = 0;
@@ -120,7 +118,6 @@ module {
       case (?id) { params.add("client_reference_id=" # urlEncode(id)) };
       case (null) {};
     };
-
     params.values().join("&");
   };
 

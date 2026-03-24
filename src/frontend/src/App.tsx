@@ -6,6 +6,7 @@ import {
   createRouter,
 } from "@tanstack/react-router";
 import { ThemeProvider } from "next-themes";
+import { useEffect, useState } from "react";
 import Layout from "./components/Layout";
 import AdminAnnouncementPage from "./pages/AdminAnnouncementPage";
 import AdminCategoriesPage from "./pages/AdminCategoriesPage";
@@ -191,11 +192,33 @@ declare module "@tanstack/react-router" {
   }
 }
 
+function AppContent() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    // Wait 700ms then fade in — gives backend calls time to resolve
+    // so hero image and text arrive together rather than text flashing in alone
+    const timer = setTimeout(() => setVisible(true), 700);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div
+      style={{
+        opacity: visible ? 1 : 0,
+        transition: "opacity 500ms ease-in-out",
+      }}
+    >
+      <RouterProvider router={router} />
+      <Toaster />
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-      <RouterProvider router={router} />
-      <Toaster />
+      <AppContent />
     </ThemeProvider>
   );
 }

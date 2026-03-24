@@ -86,6 +86,22 @@ module {
 
   func buildCheckoutSessionBody(items : [ShoppingItem], allowedCountries : [Text], successUrl : Text, cancelUrl : Text, clientReferenceId : ?Text) : Text {
     let params = List.empty<Text>();
+
+    // Required fields first - before line items to ensure they are not truncated
+    params.add("mode=payment");
+    params.add("success_url=" # urlEncode(successUrl));
+    params.add("cancel_url=" # urlEncode(cancelUrl));
+    params.add("billing_address_collection=required");
+    params.add("phone_number_collection[enabled]=true");
+
+    // Shipping address collection with correctly incrementing country index
+    var countryIndex = 0;
+    for (country in allowedCountries.vals()) {
+      params.add("shipping_address_collection[allowed_countries][" # countryIndex.toText() # "]=" # urlEncode(country));
+      countryIndex += 1;
+    };
+
+    // Line items
     var index = 0;
     for (item in items.vals()) {
       let indexText = index.toText();
@@ -96,16 +112,7 @@ module {
       params.add("line_items[" # indexText # "][quantity]=" # item.quantity.toText());
       index += 1;
     };
-    params.add("mode=payment");
-    params.add("success_url=" # urlEncode(successUrl));
-    params.add("cancel_url=" # urlEncode(cancelUrl));
-    params.add("billing_address_collection=required");
-    params.add("phone_number_collection[enabled]=true");
-    var countryIndex = 0;
-    for (country in allowedCountries.vals()) {
-      params.add("shipping_address_collection[allowed_countries][" # countryIndex.toText() # "]=" # urlEncode(country));
-      countryIndex += 1;
-    };
+
     switch (clientReferenceId) {
       case (?id) { params.add("client_reference_id=" # urlEncode(id)) };
       case (null) {};

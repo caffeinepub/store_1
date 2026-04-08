@@ -1,0 +1,144 @@
+// Version: 1.0.0
+type Address__953786501 =
+  {
+    city : Text;
+    country : Text;
+    name : Text;
+    state : Text;
+    street : Text;
+    zip : Text
+  };
+type AnnouncementBanner__1008913826 = {enabled : Bool; message : Text};
+type Category__164941945 =
+  {description : Text; id : Text; name : Text; order : Nat};
+type Color__77327923 = Text;
+type ContactForm__776882898 =
+  {email : Text; message : Text; name : Text; timestamp : Int};
+type Data__791452850<K, V> =
+  {var count : Nat__490723111; kvs : [var ?(K, V)]};
+type ExternalBlob__246066408 = Blob;
+type HeroSection__685865635 =
+  {headline : Text; image : ?ExternalBlob__246066408; tagline : Text};
+type Internal__8484328<K, V> =
+  {children : [var ?Node__46230540<K, V>]; data : Data__791452850<K, V>};
+type Leaf__809889148<K, V> = {data : Data__791452850<K, V>};
+type Map__158565046<K, V> = Map__297112838<K, V>;
+type Map__297112838<K, V> =
+  {var root : Node__46230540<K, V>; var size : Nat__490723111};
+type Map__605269027<K, V> = Map__158565046<K, V>;
+type Nat__490723111 = Nat__920180692;
+type Nat__920180692 = Nat;
+type NewsletterSubscriber__742227594 = {email : Text; signupDate : Int};
+type Node__46230540<K, V> =
+  {#internal : Internal__8484328<K, V>; #leaf : Leaf__809889148<K, V>};
+type Order__762448211 =
+  {
+    id : Text;
+    printifyCost : ?Nat;
+    products : [Product__853085059];
+    shippingAddress : Address__953786501;
+    shippingOption : ShippingOption__622126140;
+    status : Text;
+    timestamp : Int;
+    total : Nat;
+    userId : Principal
+  };
+type ProductStatus__590634418 = {#available; #hidden; #soldOut};
+type Product__853085059 =
+  {
+    categoryId : Text;
+    colors : [Color__77327923];
+    description : Text;
+    featured : Bool;
+    id : Text;
+    images : [ExternalBlob__246066408];
+    name : Text;
+    order : Nat;
+    price : Nat;
+    sizes : [Size__428150171];
+    status : ProductStatus__590634418;
+    weight : Nat
+  };
+type ShippingOption__622126140 =
+  {basePrice : Nat; itemPrice : Nat; name : Text};
+type Size__428150171 = {#L; #M; #S; #XL; #XXL; #XXXL; #XXXXL; #XXXXXL};
+type SocialLinks__555128661 =
+  {
+    instagram : Text;
+    kick : Text;
+    tiktok : Text;
+    twitch : Text;
+    youtube : Text
+  };
+type StripeConfiguration__96897619 =
+  {allowedCountries : [Text]; secretKey : Text};
+type UserProfile__491224006 = {email : Text; name : Text};
+type UserRole__1054455867 = {#admin; #guest; #user};
+actor {
+  stable accessControlState :
+    {
+      var adminAssigned : Bool;
+      userRoles : Map__605269027<Principal, UserRole__1054455867>
+    };
+  stable allShippingCountries : [Text];
+  stable var announcementBanner : ?AnnouncementBanner__1008913826;
+  stable categories :
+    {
+      var root : Node__46230540<Text, Category__164941945>;
+      var size : Nat__490723111
+    };
+  stable contactForms :
+    {
+      var root : Node__46230540<Text, ContactForm__776882898>;
+      var size : Nat__490723111
+    };
+  stable var heroSection : ?HeroSection__685865635;
+  stable newsletterSubscribers :
+    {
+      var root : Node__46230540<Text, NewsletterSubscriber__742227594>;
+      var size : Nat__490723111
+    };
+  stable orders :
+    {
+      var root : Node__46230540<Text, Order__762448211>;
+      var size : Nat__490723111
+    };
+  stable productBulletPoints :
+    {var root : Node__46230540<Text, [Text]>; var size : Nat__490723111};
+  stable products :
+    {
+      var root : Node__46230540<Text, Product__853085059>;
+      var size : Nat__490723111
+    };
+  stable var shippingRates :
+    {
+      australia : Nat;
+      canada : Nat;
+      restOfWorld : Nat;
+      usExpress : Nat;
+      usOvernight : Nat;
+      usStandard : Nat
+    };
+  stable var shippingRatesV2 :
+    {
+      australiaBase : Nat;
+      australiaPerItem : Nat;
+      canadaBase : Nat;
+      canadaPerItem : Nat;
+      restOfWorldBase : Nat;
+      restOfWorldPerItem : Nat;
+      usEconomyBase : Nat;
+      usEconomyPerItem : Nat;
+      usExpressBase : Nat;
+      usExpressPerItem : Nat;
+      usStandardBase : Nat;
+      usStandardPerItem : Nat
+    };
+  stable var socialLinks : ?SocialLinks__555128661;
+  stable var stripeConfig : ?StripeConfiguration__96897619;
+  stable userProfiles :
+    {
+      var root : Node__46230540<Principal, UserProfile__491224006>;
+      var size : Nat__490723111
+    }
+};

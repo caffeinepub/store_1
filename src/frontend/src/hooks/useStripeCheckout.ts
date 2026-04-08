@@ -21,7 +21,12 @@ export function useCreateCheckoutSession() {
         successUrl,
         cancelUrl,
       );
-      const session = JSON.parse(result) as CheckoutSession;
+      const session = JSON.parse(result) as CheckoutSession & {
+        error?: { message?: string; type?: string };
+      };
+      if (session?.error) {
+        throw new Error(session.error.message || JSON.stringify(session.error));
+      }
       if (!session?.url) {
         throw new Error("Stripe session missing url");
       }

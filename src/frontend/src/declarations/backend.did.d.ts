@@ -76,12 +76,18 @@ export interface ShippingOption {
   'basePrice' : bigint,
 }
 export interface ShippingRates {
-  'australia' : bigint,
-  'usExpress' : bigint,
-  'usOvernight' : bigint,
-  'usStandard' : bigint,
-  'canada' : bigint,
-  'restOfWorld' : bigint,
+  'usEconomyBase' : bigint,
+  'restOfWorldPerItem' : bigint,
+  'usStandardPerItem' : bigint,
+  'australiaPerItem' : bigint,
+  'canadaPerItem' : bigint,
+  'restOfWorldBase' : bigint,
+  'canadaBase' : bigint,
+  'australiaBase' : bigint,
+  'usEconomyPerItem' : bigint,
+  'usExpressPerItem' : bigint,
+  'usExpressBase' : bigint,
+  'usStandardBase' : bigint,
 }
 export interface ShoppingItem {
   'productName' : string,
@@ -126,14 +132,14 @@ export interface UserProfile { 'name' : string, 'email' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
-export interface _CaffeineStorageCreateCertificateResult {
+export interface _ImmutableObjectStorageCreateCertificateResult {
   'method' : string,
   'blob_hash' : string,
 }
-export interface _CaffeineStorageRefillInformation {
+export interface _ImmutableObjectStorageRefillInformation {
   'proposed_top_up_amount' : [] | [bigint],
 }
-export interface _CaffeineStorageRefillResult {
+export interface _ImmutableObjectStorageRefillResult {
   'success' : [] | [boolean],
   'topped_up_amount' : [] | [bigint],
 }
@@ -144,26 +150,29 @@ export interface http_request_result {
   'headers' : Array<http_header>,
 }
 export interface _SERVICE {
-  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
-  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
-  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+  '_immutableObjectStorageBlobsAreLive' : ActorMethod<
+    [Array<Uint8Array>],
+    Array<boolean>
+  >,
+  '_immutableObjectStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_immutableObjectStorageConfirmBlobDeletion' : ActorMethod<
     [Array<Uint8Array>],
     undefined
   >,
-  '_caffeineStorageCreateCertificate' : ActorMethod<
+  '_immutableObjectStorageCreateCertificate' : ActorMethod<
     [string],
-    _CaffeineStorageCreateCertificateResult
+    _ImmutableObjectStorageCreateCertificateResult
   >,
-  '_caffeineStorageRefillCashier' : ActorMethod<
-    [[] | [_CaffeineStorageRefillInformation]],
-    _CaffeineStorageRefillResult
+  '_immutableObjectStorageRefillCashier' : ActorMethod<
+    [[] | [_ImmutableObjectStorageRefillInformation]],
+    _ImmutableObjectStorageRefillResult
   >,
-  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
-  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  '_immutableObjectStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
+  '_initializeAccessControl' : ActorMethod<[], undefined>,
   'addCategory' : ActorMethod<[Category], undefined>,
   'addProduct' : ActorMethod<[Product], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
-  'calculateShipping' : ActorMethod<[string, Array<Product>], bigint>,
+  'calculateShipping' : ActorMethod<[string, string, bigint], bigint>,
   'createCheckoutSession' : ActorMethod<
     [Array<ShoppingItem>, string, string],
     string
@@ -175,6 +184,7 @@ export interface _SERVICE {
   'deleteCategory' : ActorMethod<[string], undefined>,
   'deleteProduct' : ActorMethod<[string], undefined>,
   'getAllOrders' : ActorMethod<[], Array<Order>>,
+  'getAllProductBulletPoints' : ActorMethod<[], Array<[string, Array<string>]>>,
   'getAnnouncementBanner' : ActorMethod<[], [] | [AnnouncementBanner]>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
@@ -183,6 +193,7 @@ export interface _SERVICE {
   'getHeroSection' : ActorMethod<[], [] | [HeroSection]>,
   'getNewsletterSubscribers' : ActorMethod<[], Array<NewsletterSubscriber>>,
   'getOrder' : ActorMethod<[string], [] | [Order]>,
+  'getProductBulletPoints' : ActorMethod<[string], Array<string>>,
   'getProducts' : ActorMethod<[], Array<Product>>,
   'getShippingRates' : ActorMethod<[], ShippingRates>,
   'getSocialLinks' : ActorMethod<[], [] | [SocialLinks]>,
@@ -195,6 +206,7 @@ export interface _SERVICE {
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'setAnnouncementBanner' : ActorMethod<[AnnouncementBanner], undefined>,
   'setHeroSection' : ActorMethod<[HeroSection], undefined>,
+  'setProductBulletPoints' : ActorMethod<[string, Array<string>], undefined>,
   'setProductFeatured' : ActorMethod<[string, boolean], undefined>,
   'setProductStatus' : ActorMethod<[string, ProductStatus], undefined>,
   'setShippingRates' : ActorMethod<[ShippingRates], undefined>,

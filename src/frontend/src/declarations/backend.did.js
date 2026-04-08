@@ -8,14 +8,14 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const _CaffeineStorageCreateCertificateResult = IDL.Record({
+export const _ImmutableObjectStorageCreateCertificateResult = IDL.Record({
   'method' : IDL.Text,
   'blob_hash' : IDL.Text,
 });
-export const _CaffeineStorageRefillInformation = IDL.Record({
+export const _ImmutableObjectStorageRefillInformation = IDL.Record({
   'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
 });
-export const _CaffeineStorageRefillResult = IDL.Record({
+export const _ImmutableObjectStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
@@ -116,12 +116,18 @@ export const NewsletterSubscriber = IDL.Record({
   'email' : IDL.Text,
 });
 export const ShippingRates = IDL.Record({
-  'australia' : IDL.Nat,
-  'usExpress' : IDL.Nat,
-  'usOvernight' : IDL.Nat,
-  'usStandard' : IDL.Nat,
-  'canada' : IDL.Nat,
-  'restOfWorld' : IDL.Nat,
+  'usEconomyBase' : IDL.Nat,
+  'restOfWorldPerItem' : IDL.Nat,
+  'usStandardPerItem' : IDL.Nat,
+  'australiaPerItem' : IDL.Nat,
+  'canadaPerItem' : IDL.Nat,
+  'restOfWorldBase' : IDL.Nat,
+  'canadaBase' : IDL.Nat,
+  'australiaBase' : IDL.Nat,
+  'usEconomyPerItem' : IDL.Nat,
+  'usExpressPerItem' : IDL.Nat,
+  'usExpressBase' : IDL.Nat,
+  'usStandardBase' : IDL.Nat,
 });
 export const SocialLinks = IDL.Record({
   'tiktok' : IDL.Text,
@@ -161,38 +167,38 @@ export const TransformationOutput = IDL.Record({
 });
 
 export const idlService = IDL.Service({
-  '_caffeineStorageBlobIsLive' : IDL.Func(
-      [IDL.Vec(IDL.Nat8)],
-      [IDL.Bool],
+  '_immutableObjectStorageBlobsAreLive' : IDL.Func(
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      [IDL.Vec(IDL.Bool)],
       ['query'],
     ),
-  '_caffeineStorageBlobsToDelete' : IDL.Func(
+  '_immutableObjectStorageBlobsToDelete' : IDL.Func(
       [],
       [IDL.Vec(IDL.Vec(IDL.Nat8))],
       ['query'],
     ),
-  '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+  '_immutableObjectStorageConfirmBlobDeletion' : IDL.Func(
       [IDL.Vec(IDL.Vec(IDL.Nat8))],
       [],
       [],
     ),
-  '_caffeineStorageCreateCertificate' : IDL.Func(
+  '_immutableObjectStorageCreateCertificate' : IDL.Func(
       [IDL.Text],
-      [_CaffeineStorageCreateCertificateResult],
+      [_ImmutableObjectStorageCreateCertificateResult],
       [],
     ),
-  '_caffeineStorageRefillCashier' : IDL.Func(
-      [IDL.Opt(_CaffeineStorageRefillInformation)],
-      [_CaffeineStorageRefillResult],
+  '_immutableObjectStorageRefillCashier' : IDL.Func(
+      [IDL.Opt(_ImmutableObjectStorageRefillInformation)],
+      [_ImmutableObjectStorageRefillResult],
       [],
     ),
-  '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
-  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  '_immutableObjectStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+  '_initializeAccessControl' : IDL.Func([], [], []),
   'addCategory' : IDL.Func([Category], [], []),
   'addProduct' : IDL.Func([Product], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'calculateShipping' : IDL.Func(
-      [IDL.Text, IDL.Vec(Product)],
+      [IDL.Text, IDL.Text, IDL.Nat],
       [IDL.Nat],
       ['query'],
     ),
@@ -209,6 +215,11 @@ export const idlService = IDL.Service({
   'deleteCategory' : IDL.Func([IDL.Text], [], []),
   'deleteProduct' : IDL.Func([IDL.Text], [], []),
   'getAllOrders' : IDL.Func([], [IDL.Vec(Order)], ['query']),
+  'getAllProductBulletPoints' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Vec(IDL.Text)))],
+      ['query'],
+    ),
   'getAnnouncementBanner' : IDL.Func(
       [],
       [IDL.Opt(AnnouncementBanner)],
@@ -225,6 +236,11 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'getOrder' : IDL.Func([IDL.Text], [IDL.Opt(Order)], ['query']),
+  'getProductBulletPoints' : IDL.Func(
+      [IDL.Text],
+      [IDL.Vec(IDL.Text)],
+      ['query'],
+    ),
   'getProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
   'getShippingRates' : IDL.Func([], [ShippingRates], ['query']),
   'getSocialLinks' : IDL.Func([], [IDL.Opt(SocialLinks)], ['query']),
@@ -241,6 +257,7 @@ export const idlService = IDL.Service({
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'setAnnouncementBanner' : IDL.Func([AnnouncementBanner], [], []),
   'setHeroSection' : IDL.Func([HeroSection], [], []),
+  'setProductBulletPoints' : IDL.Func([IDL.Text, IDL.Vec(IDL.Text)], [], []),
   'setProductFeatured' : IDL.Func([IDL.Text, IDL.Bool], [], []),
   'setProductStatus' : IDL.Func([IDL.Text, ProductStatus], [], []),
   'setShippingRates' : IDL.Func([ShippingRates], [], []),
@@ -262,14 +279,14 @@ export const idlService = IDL.Service({
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
-  const _CaffeineStorageCreateCertificateResult = IDL.Record({
+  const _ImmutableObjectStorageCreateCertificateResult = IDL.Record({
     'method' : IDL.Text,
     'blob_hash' : IDL.Text,
   });
-  const _CaffeineStorageRefillInformation = IDL.Record({
+  const _ImmutableObjectStorageRefillInformation = IDL.Record({
     'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
   });
-  const _CaffeineStorageRefillResult = IDL.Record({
+  const _ImmutableObjectStorageRefillResult = IDL.Record({
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
@@ -367,12 +384,18 @@ export const idlFactory = ({ IDL }) => {
     'email' : IDL.Text,
   });
   const ShippingRates = IDL.Record({
-    'australia' : IDL.Nat,
-    'usExpress' : IDL.Nat,
-    'usOvernight' : IDL.Nat,
-    'usStandard' : IDL.Nat,
-    'canada' : IDL.Nat,
-    'restOfWorld' : IDL.Nat,
+    'usEconomyBase' : IDL.Nat,
+    'restOfWorldPerItem' : IDL.Nat,
+    'usStandardPerItem' : IDL.Nat,
+    'australiaPerItem' : IDL.Nat,
+    'canadaPerItem' : IDL.Nat,
+    'restOfWorldBase' : IDL.Nat,
+    'canadaBase' : IDL.Nat,
+    'australiaBase' : IDL.Nat,
+    'usEconomyPerItem' : IDL.Nat,
+    'usExpressPerItem' : IDL.Nat,
+    'usExpressBase' : IDL.Nat,
+    'usStandardBase' : IDL.Nat,
   });
   const SocialLinks = IDL.Record({
     'tiktok' : IDL.Text,
@@ -409,38 +432,38 @@ export const idlFactory = ({ IDL }) => {
   });
   
   return IDL.Service({
-    '_caffeineStorageBlobIsLive' : IDL.Func(
-        [IDL.Vec(IDL.Nat8)],
-        [IDL.Bool],
+    '_immutableObjectStorageBlobsAreLive' : IDL.Func(
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        [IDL.Vec(IDL.Bool)],
         ['query'],
       ),
-    '_caffeineStorageBlobsToDelete' : IDL.Func(
+    '_immutableObjectStorageBlobsToDelete' : IDL.Func(
         [],
         [IDL.Vec(IDL.Vec(IDL.Nat8))],
         ['query'],
       ),
-    '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+    '_immutableObjectStorageConfirmBlobDeletion' : IDL.Func(
         [IDL.Vec(IDL.Vec(IDL.Nat8))],
         [],
         [],
       ),
-    '_caffeineStorageCreateCertificate' : IDL.Func(
+    '_immutableObjectStorageCreateCertificate' : IDL.Func(
         [IDL.Text],
-        [_CaffeineStorageCreateCertificateResult],
+        [_ImmutableObjectStorageCreateCertificateResult],
         [],
       ),
-    '_caffeineStorageRefillCashier' : IDL.Func(
-        [IDL.Opt(_CaffeineStorageRefillInformation)],
-        [_CaffeineStorageRefillResult],
+    '_immutableObjectStorageRefillCashier' : IDL.Func(
+        [IDL.Opt(_ImmutableObjectStorageRefillInformation)],
+        [_ImmutableObjectStorageRefillResult],
         [],
       ),
-    '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
-    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    '_immutableObjectStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+    '_initializeAccessControl' : IDL.Func([], [], []),
     'addCategory' : IDL.Func([Category], [], []),
     'addProduct' : IDL.Func([Product], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'calculateShipping' : IDL.Func(
-        [IDL.Text, IDL.Vec(Product)],
+        [IDL.Text, IDL.Text, IDL.Nat],
         [IDL.Nat],
         ['query'],
       ),
@@ -457,6 +480,11 @@ export const idlFactory = ({ IDL }) => {
     'deleteCategory' : IDL.Func([IDL.Text], [], []),
     'deleteProduct' : IDL.Func([IDL.Text], [], []),
     'getAllOrders' : IDL.Func([], [IDL.Vec(Order)], ['query']),
+    'getAllProductBulletPoints' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Vec(IDL.Text)))],
+        ['query'],
+      ),
     'getAnnouncementBanner' : IDL.Func(
         [],
         [IDL.Opt(AnnouncementBanner)],
@@ -473,6 +501,11 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getOrder' : IDL.Func([IDL.Text], [IDL.Opt(Order)], ['query']),
+    'getProductBulletPoints' : IDL.Func(
+        [IDL.Text],
+        [IDL.Vec(IDL.Text)],
+        ['query'],
+      ),
     'getProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
     'getShippingRates' : IDL.Func([], [ShippingRates], ['query']),
     'getSocialLinks' : IDL.Func([], [IDL.Opt(SocialLinks)], ['query']),
@@ -489,6 +522,7 @@ export const idlFactory = ({ IDL }) => {
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'setAnnouncementBanner' : IDL.Func([AnnouncementBanner], [], []),
     'setHeroSection' : IDL.Func([HeroSection], [], []),
+    'setProductBulletPoints' : IDL.Func([IDL.Text, IDL.Vec(IDL.Text)], [], []),
     'setProductFeatured' : IDL.Func([IDL.Text, IDL.Bool], [], []),
     'setProductStatus' : IDL.Func([IDL.Text, ProductStatus], [], []),
     'setShippingRates' : IDL.Func([ShippingRates], [], []),

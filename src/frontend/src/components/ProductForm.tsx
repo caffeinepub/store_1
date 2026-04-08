@@ -188,9 +188,6 @@ export default function ProductForm({
         id: product?.id || `product-${Date.now()}`,
         name: name.trim(),
         description: description.trim(),
-        // Keep for backward compat with backend.ts type — bullet points are
-        // saved separately via setProductBulletPoints after the product save.
-        bulletPoints: filteredBulletPoints,
         price: BigInt(Math.round(Number.parseFloat(price) * 100)),
         images: allImages,
         sizes: selectedSizes,

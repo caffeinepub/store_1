@@ -1,0 +1,243 @@
+type http_request_result = 
+ record {
+   body: blob;
+   headers: vec http_header;
+   status: nat;
+ };
+type http_header = 
+ record {
+   name: text;
+   value: text;
+ };
+type _ImmutableObjectStorageRefillResult = 
+ record {
+   success: opt bool;
+   topped_up_amount: opt nat;
+ };
+type _ImmutableObjectStorageRefillInformation = record {
+                                                  proposed_top_up_amount:
+                                                   opt nat;};
+type _ImmutableObjectStorageCreateCertificateResult = 
+ record {
+   blob_hash: text;
+   method: text;
+ };
+type UserRole = 
+ variant {
+   admin;
+   guest;
+   user;
+ };
+type UserProfile = 
+ record {
+   email: text;
+   name: text;
+ };
+type TransformationOutput = 
+ record {
+   body: blob;
+   headers: vec http_header;
+   status: nat;
+ };
+type TransformationInput = 
+ record {
+   context: blob;
+   response: http_request_result;
+ };
+type StripeSessionStatus = 
+ variant {
+   completed: record {
+                response: text;
+                userPrincipal: opt text;
+              };
+   failed: record {error: text;};
+ };
+type StripeConfiguration = 
+ record {
+   allowedCountries: vec text;
+   secretKey: text;
+ };
+type SocialLinks = 
+ record {
+   instagram: text;
+   kick: text;
+   tiktok: text;
+   twitch: text;
+   youtube: text;
+ };
+type Size = 
+ variant {
+   L;
+   M;
+   S;
+   XL;
+   XXL;
+   XXXL;
+   XXXXL;
+   XXXXXL;
+ };
+type ShoppingItem = 
+ record {
+   currency: text;
+   priceInCents: nat;
+   productDescription: text;
+   productName: text;
+   quantity: nat;
+ };
+type ShippingRates = 
+ record {
+   australiaBase: nat;
+   australiaPerItem: nat;
+   canadaBase: nat;
+   canadaPerItem: nat;
+   restOfWorldBase: nat;
+   restOfWorldPerItem: nat;
+   usEconomyBase: nat;
+   usEconomyPerItem: nat;
+   usExpressBase: nat;
+   usExpressPerItem: nat;
+   usStandardBase: nat;
+   usStandardPerItem: nat;
+ };
+type ShippingOption = 
+ record {
+   basePrice: nat;
+   itemPrice: nat;
+   name: text;
+ };
+type ProductStatus = 
+ variant {
+   available;
+   hidden;
+   soldOut;
+ };
+type Product = 
+ record {
+   categoryId: text;
+   colors: vec Color;
+   description: text;
+   featured: bool;
+   id: text;
+   images: vec ExternalBlob;
+   name: text;
+   order: nat;
+   price: nat;
+   sizes: vec Size;
+   status: ProductStatus;
+   weight: nat;
+ };
+type Order = 
+ record {
+   id: text;
+   printifyCost: opt nat;
+   products: vec Product;
+   shippingAddress: Address;
+   shippingOption: ShippingOption;
+   status: text;
+   timestamp: int;
+   total: nat;
+   userId: principal;
+ };
+type NewsletterSubscriber = 
+ record {
+   email: text;
+   signupDate: int;
+ };
+type HeroSection = 
+ record {
+   headline: text;
+   image: opt ExternalBlob;
+   tagline: text;
+ };
+type ExternalBlob = blob;
+type ContactForm = 
+ record {
+   email: text;
+   message: text;
+   name: text;
+   timestamp: int;
+ };
+type Color = text;
+type Category = 
+ record {
+   description: text;
+   id: text;
+   name: text;
+   order: nat;
+ };
+type AnnouncementBanner = 
+ record {
+   enabled: bool;
+   message: text;
+ };
+type Address = 
+ record {
+   city: text;
+   country: text;
+   name: text;
+   state: text;
+   street: text;
+   zip: text;
+ };
+service : {
+  _immutableObjectStorageBlobsAreLive: (hashes: vec blob) -> (vec bool) query;
+  _immutableObjectStorageBlobsToDelete: () -> (vec blob) query;
+  _immutableObjectStorageConfirmBlobDeletion: (blobs: vec blob) -> ();
+  _immutableObjectStorageCreateCertificate: (blobHash: text) ->
+   (_ImmutableObjectStorageCreateCertificateResult);
+  _immutableObjectStorageRefillCashier: (refillInformation:
+   opt _ImmutableObjectStorageRefillInformation) ->
+   (_ImmutableObjectStorageRefillResult);
+  _immutableObjectStorageUpdateGatewayPrincipals: () -> ();
+  _initializeAccessControl: () -> ();
+  addCategory: (category: Category) -> ();
+  addProduct: (product: Product) -> ();
+  assignCallerUserRole: (user: principal, role: UserRole) -> ();
+  calculateShipping: (destination: text, method: text, itemCount: nat) ->
+   (nat) query;
+  createCheckoutSession: (items: vec ShoppingItem, successUrl: text,
+   cancelUrl: text) -> (text);
+  createOrder: (productList: vec Product, total: nat, shippingAddress:
+   Address, shippingOption: ShippingOption) -> (opt Order);
+  deleteCategory: (id: text) -> ();
+  deleteProduct: (id: text) -> ();
+  getAllOrders: () -> (vec Order) query;
+  getAllProductBulletPoints: () -> (vec record {
+                                          text;
+                                          vec text;
+                                        }) query;
+  getAnnouncementBanner: () -> (opt AnnouncementBanner) query;
+  getCallerUserProfile: () -> (opt UserProfile) query;
+  getCallerUserRole: () -> (UserRole) query;
+  getCategories: () -> (vec Category) query;
+  getContactForms: () -> (vec ContactForm) query;
+  getHeroSection: () -> (opt HeroSection) query;
+  getNewsletterSubscribers: () -> (vec NewsletterSubscriber) query;
+  getOrder: (id: text) -> (opt Order) query;
+  getProductBulletPoints: (id: text) -> (vec text) query;
+  getProducts: () -> (vec Product) query;
+  getShippingRates: () -> (ShippingRates) query;
+  getSocialLinks: () -> (opt SocialLinks) query;
+  getStripeSessionStatus: (sessionId: text) -> (StripeSessionStatus);
+  getUserProfile: (user: principal) -> (opt UserProfile) query;
+  isCallerAdmin: () -> (bool) query;
+  isStripeConfigured: () -> (bool) query;
+  reorderCategories: (orderedIds: vec text) -> ();
+  reorderProducts: (orderedIds: vec text) -> ();
+  saveCallerUserProfile: (profile: UserProfile) -> ();
+  setAnnouncementBanner: (banner: AnnouncementBanner) -> ();
+  setHeroSection: (section: HeroSection) -> ();
+  setProductBulletPoints: (id: text, points: vec text) -> ();
+  setProductFeatured: (id: text, featured: bool) -> ();
+  setProductStatus: (id: text, status: ProductStatus) -> ();
+  setShippingRates: (rates: ShippingRates) -> ();
+  setSocialLinks: (links: SocialLinks) -> ();
+  setStripeConfiguration: (config: StripeConfiguration) -> ();
+  submitContactForm: (form: ContactForm) -> ();
+  subscribeToNewsletter: (email: text) -> ();
+  transform: (input: TransformationInput) -> (TransformationOutput) query;
+  updateCategory: (category: Category) -> ();
+  updateOrderCost: (orderId: text, cost: nat) -> ();
+  updateOrderStatus: (orderId: text, status: text) -> ();
+  updateProduct: (product: Product) -> ();
+}

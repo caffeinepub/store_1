@@ -89,11 +89,6 @@ export class ExternalBlob {
         return this;
     }
 }
-export interface ShippingOption {
-    name: string;
-    itemPrice: bigint;
-    basePrice: bigint;
-}
 export interface Product {
     id: string;
     categoryId: string;
@@ -103,7 +98,6 @@ export interface Product {
     order: bigint;
     name: string;
     description: string;
-    bulletPoints: Array<string>;
     sizes: Array<Size>;
     colors: Array<Color>;
     price: bigint;
@@ -114,6 +108,14 @@ export interface Category {
     order: bigint;
     name: string;
     description: string;
+}
+export interface Address {
+    zip: string;
+    street: string;
+    country: string;
+    city: string;
+    name: string;
+    state: string;
 }
 export interface TransformationOutput {
     status: bigint;
@@ -126,7 +128,11 @@ export interface ContactForm {
     message: string;
     timestamp: bigint;
 }
-export interface _CaffeineStorageRefillInformation {
+export interface AnnouncementBanner {
+    enabled: boolean;
+    message: string;
+}
+export interface _ImmutableObjectStorageRefillInformation {
     proposed_top_up_amount?: bigint;
 }
 export interface SocialLinks {
@@ -136,11 +142,7 @@ export interface SocialLinks {
     kick: string;
     youtube: string;
 }
-export interface AnnouncementBanner {
-    enabled: boolean;
-    message: string;
-}
-export interface _CaffeineStorageCreateCertificateResult {
+export interface _ImmutableObjectStorageCreateCertificateResult {
     method: string;
     blob_hash: string;
 }
@@ -164,6 +166,10 @@ export interface http_header {
     value: string;
     name: string;
 }
+export interface _ImmutableObjectStorageRefillResult {
+    success?: boolean;
+    topped_up_amount?: bigint;
+}
 export interface http_request_result {
     status: bigint;
     body: Uint8Array;
@@ -181,22 +187,20 @@ export interface TransformationInput {
     response: http_request_result;
 }
 export interface ShippingRates {
-    australia: bigint;
-    usExpress: bigint;
-    usOvernight: bigint;
-    usStandard: bigint;
-    canada: bigint;
-    restOfWorld: bigint;
+    usEconomyBase: bigint;
+    restOfWorldPerItem: bigint;
+    usStandardPerItem: bigint;
+    australiaPerItem: bigint;
+    canadaPerItem: bigint;
+    restOfWorldBase: bigint;
+    canadaBase: bigint;
+    australiaBase: bigint;
+    usEconomyPerItem: bigint;
+    usExpressPerItem: bigint;
+    usExpressBase: bigint;
+    usStandardBase: bigint;
 }
 export type Color = string;
-export interface Address {
-    zip: string;
-    street: string;
-    country: string;
-    city: string;
-    name: string;
-    state: string;
-}
 export type StripeSessionStatus = {
     __kind__: "completed";
     completed: {
@@ -217,13 +221,14 @@ export interface NewsletterSubscriber {
     signupDate: bigint;
     email: string;
 }
-export interface _CaffeineStorageRefillResult {
-    success?: boolean;
-    topped_up_amount?: bigint;
-}
 export interface UserProfile {
     name: string;
     email: string;
+}
+export interface ShippingOption {
+    name: string;
+    itemPrice: bigint;
+    basePrice: bigint;
 }
 export enum ProductStatus {
     hidden = "hidden",
@@ -246,22 +251,23 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
-    _caffeineStorageBlobIsLive(hash: Uint8Array): Promise<boolean>;
-    _caffeineStorageBlobsToDelete(): Promise<Array<Uint8Array>>;
-    _caffeineStorageConfirmBlobDeletion(blobs: Array<Uint8Array>): Promise<void>;
-    _caffeineStorageCreateCertificate(blobHash: string): Promise<_CaffeineStorageCreateCertificateResult>;
-    _caffeineStorageRefillCashier(refillInformation: _CaffeineStorageRefillInformation | null): Promise<_CaffeineStorageRefillResult>;
-    _caffeineStorageUpdateGatewayPrincipals(): Promise<void>;
-    _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
+    _immutableObjectStorageBlobsAreLive(hashes: Array<Uint8Array>): Promise<Array<boolean>>;
+    _immutableObjectStorageBlobsToDelete(): Promise<Array<Uint8Array>>;
+    _immutableObjectStorageConfirmBlobDeletion(blobs: Array<Uint8Array>): Promise<void>;
+    _immutableObjectStorageCreateCertificate(blobHash: string): Promise<_ImmutableObjectStorageCreateCertificateResult>;
+    _immutableObjectStorageRefillCashier(refillInformation: _ImmutableObjectStorageRefillInformation | null): Promise<_ImmutableObjectStorageRefillResult>;
+    _immutableObjectStorageUpdateGatewayPrincipals(): Promise<void>;
+    _initializeAccessControl(): Promise<void>;
     addCategory(category: Category): Promise<void>;
     addProduct(product: Product): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    calculateShipping(destination: string, productList: Array<Product>): Promise<bigint>;
+    calculateShipping(destination: string, method: string, itemCount: bigint): Promise<bigint>;
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
     createOrder(productList: Array<Product>, total: bigint, shippingAddress: Address, shippingOption: ShippingOption): Promise<Order | null>;
     deleteCategory(id: string): Promise<void>;
     deleteProduct(id: string): Promise<void>;
     getAllOrders(): Promise<Array<Order>>;
+    getAllProductBulletPoints(): Promise<Array<[string, Array<string>]>>;
     getAnnouncementBanner(): Promise<AnnouncementBanner | null>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
@@ -270,6 +276,7 @@ export interface backendInterface {
     getHeroSection(): Promise<HeroSection | null>;
     getNewsletterSubscribers(): Promise<Array<NewsletterSubscriber>>;
     getOrder(id: string): Promise<Order | null>;
+    getProductBulletPoints(id: string): Promise<Array<string>>;
     getProducts(): Promise<Array<Product>>;
     getShippingRates(): Promise<ShippingRates>;
     getSocialLinks(): Promise<SocialLinks | null>;
@@ -282,6 +289,7 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setAnnouncementBanner(banner: AnnouncementBanner): Promise<void>;
     setHeroSection(section: HeroSection): Promise<void>;
+    setProductBulletPoints(id: string, points: Array<string>): Promise<void>;
     setProductFeatured(id: string, featured: boolean): Promise<void>;
     setProductStatus(id: string, status: ProductStatus): Promise<void>;
     setShippingRates(rates: ShippingRates): Promise<void>;
@@ -295,104 +303,104 @@ export interface backendInterface {
     updateOrderStatus(orderId: string, status: string): Promise<void>;
     updateProduct(product: Product): Promise<void>;
 }
-import type { Address as _Address, AnnouncementBanner as _AnnouncementBanner, Color as _Color, ExternalBlob as _ExternalBlob, HeroSection as _HeroSection, Order as _Order, Product as _Product, ProductStatus as _ProductStatus, ShippingOption as _ShippingOption, Size as _Size, SocialLinks as _SocialLinks, StripeSessionStatus as _StripeSessionStatus, UserProfile as _UserProfile, UserRole as _UserRole, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
+import type { Address as _Address, AnnouncementBanner as _AnnouncementBanner, Color as _Color, ExternalBlob as _ExternalBlob, HeroSection as _HeroSection, Order as _Order, Product as _Product, ProductStatus as _ProductStatus, ShippingOption as _ShippingOption, Size as _Size, SocialLinks as _SocialLinks, StripeSessionStatus as _StripeSessionStatus, UserProfile as _UserProfile, UserRole as _UserRole, _ImmutableObjectStorageRefillInformation as __ImmutableObjectStorageRefillInformation, _ImmutableObjectStorageRefillResult as __ImmutableObjectStorageRefillResult } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
-    async _caffeineStorageBlobIsLive(arg0: Uint8Array): Promise<boolean> {
+    async _immutableObjectStorageBlobsAreLive(arg0: Array<Uint8Array>): Promise<Array<boolean>> {
         if (this.processError) {
             try {
-                const result = await this.actor._caffeineStorageBlobIsLive(arg0);
+                const result = await this.actor._immutableObjectStorageBlobsAreLive(arg0);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor._caffeineStorageBlobIsLive(arg0);
+            const result = await this.actor._immutableObjectStorageBlobsAreLive(arg0);
             return result;
         }
     }
-    async _caffeineStorageBlobsToDelete(): Promise<Array<Uint8Array>> {
+    async _immutableObjectStorageBlobsToDelete(): Promise<Array<Uint8Array>> {
         if (this.processError) {
             try {
-                const result = await this.actor._caffeineStorageBlobsToDelete();
+                const result = await this.actor._immutableObjectStorageBlobsToDelete();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor._caffeineStorageBlobsToDelete();
+            const result = await this.actor._immutableObjectStorageBlobsToDelete();
             return result;
         }
     }
-    async _caffeineStorageConfirmBlobDeletion(arg0: Array<Uint8Array>): Promise<void> {
+    async _immutableObjectStorageConfirmBlobDeletion(arg0: Array<Uint8Array>): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor._caffeineStorageConfirmBlobDeletion(arg0);
+                const result = await this.actor._immutableObjectStorageConfirmBlobDeletion(arg0);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor._caffeineStorageConfirmBlobDeletion(arg0);
+            const result = await this.actor._immutableObjectStorageConfirmBlobDeletion(arg0);
             return result;
         }
     }
-    async _caffeineStorageCreateCertificate(arg0: string): Promise<_CaffeineStorageCreateCertificateResult> {
+    async _immutableObjectStorageCreateCertificate(arg0: string): Promise<_ImmutableObjectStorageCreateCertificateResult> {
         if (this.processError) {
             try {
-                const result = await this.actor._caffeineStorageCreateCertificate(arg0);
+                const result = await this.actor._immutableObjectStorageCreateCertificate(arg0);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor._caffeineStorageCreateCertificate(arg0);
+            const result = await this.actor._immutableObjectStorageCreateCertificate(arg0);
             return result;
         }
     }
-    async _caffeineStorageRefillCashier(arg0: _CaffeineStorageRefillInformation | null): Promise<_CaffeineStorageRefillResult> {
+    async _immutableObjectStorageRefillCashier(arg0: _ImmutableObjectStorageRefillInformation | null): Promise<_ImmutableObjectStorageRefillResult> {
         if (this.processError) {
             try {
-                const result = await this.actor._caffeineStorageRefillCashier(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0));
-                return from_candid__CaffeineStorageRefillResult_n4(this._uploadFile, this._downloadFile, result);
+                const result = await this.actor._immutableObjectStorageRefillCashier(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0));
+                return from_candid__ImmutableObjectStorageRefillResult_n4(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor._caffeineStorageRefillCashier(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0));
-            return from_candid__CaffeineStorageRefillResult_n4(this._uploadFile, this._downloadFile, result);
+            const result = await this.actor._immutableObjectStorageRefillCashier(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0));
+            return from_candid__ImmutableObjectStorageRefillResult_n4(this._uploadFile, this._downloadFile, result);
         }
     }
-    async _caffeineStorageUpdateGatewayPrincipals(): Promise<void> {
+    async _immutableObjectStorageUpdateGatewayPrincipals(): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor._caffeineStorageUpdateGatewayPrincipals();
+                const result = await this.actor._immutableObjectStorageUpdateGatewayPrincipals();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor._caffeineStorageUpdateGatewayPrincipals();
+            const result = await this.actor._immutableObjectStorageUpdateGatewayPrincipals();
             return result;
         }
     }
-    async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
+    async _initializeAccessControl(): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor._initializeAccessControlWithSecret(arg0);
+                const result = await this.actor._initializeAccessControl();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor._initializeAccessControlWithSecret(arg0);
+            const result = await this.actor._initializeAccessControl();
             return result;
         }
     }
@@ -438,17 +446,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async calculateShipping(arg0: string, arg1: Array<Product>): Promise<bigint> {
+    async calculateShipping(arg0: string, arg1: string, arg2: bigint): Promise<bigint> {
         if (this.processError) {
             try {
-                const result = await this.actor.calculateShipping(arg0, await to_candid_vec_n19(this._uploadFile, this._downloadFile, arg1));
+                const result = await this.actor.calculateShipping(arg0, arg1, arg2);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.calculateShipping(arg0, await to_candid_vec_n19(this._uploadFile, this._downloadFile, arg1));
+            const result = await this.actor.calculateShipping(arg0, arg1, arg2);
             return result;
         }
     }
@@ -520,6 +528,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getAllOrders();
             return from_candid_vec_n33(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getAllProductBulletPoints(): Promise<Array<[string, Array<string>]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllProductBulletPoints();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllProductBulletPoints();
+            return result;
         }
     }
     async getAnnouncementBanner(): Promise<AnnouncementBanner | null> {
@@ -632,6 +654,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getOrder(arg0);
             return from_candid_opt_n20(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getProductBulletPoints(arg0: string): Promise<Array<string>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getProductBulletPoints(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getProductBulletPoints(arg0);
+            return result;
         }
     }
     async getProducts(): Promise<Array<Product>> {
@@ -799,6 +835,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.setHeroSection(await to_candid_HeroSection_n47(this._uploadFile, this._downloadFile, arg0));
+            return result;
+        }
+    }
+    async setProductBulletPoints(arg0: string, arg1: Array<string>): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.setProductBulletPoints(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.setProductBulletPoints(arg0, arg1);
             return result;
         }
     }
@@ -995,7 +1045,7 @@ function from_candid_StripeSessionStatus_n43(_uploadFile: (file: ExternalBlob) =
 function from_candid_UserRole_n36(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
     return from_candid_variant_n37(_uploadFile, _downloadFile, value);
 }
-function from_candid__CaffeineStorageRefillResult_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: __CaffeineStorageRefillResult): _CaffeineStorageRefillResult {
+function from_candid__ImmutableObjectStorageRefillResult_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: __ImmutableObjectStorageRefillResult): _ImmutableObjectStorageRefillResult {
     return from_candid_record_n5(_uploadFile, _downloadFile, value);
 }
 async function from_candid_opt_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Order]): Promise<Order | null> {
@@ -1235,11 +1285,11 @@ function to_candid_Size_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Ar
 function to_candid_UserRole_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
     return to_candid_variant_n18(_uploadFile, _downloadFile, value);
 }
-function to_candid__CaffeineStorageRefillInformation_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _CaffeineStorageRefillInformation): __CaffeineStorageRefillInformation {
+function to_candid__ImmutableObjectStorageRefillInformation_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ImmutableObjectStorageRefillInformation): __ImmutableObjectStorageRefillInformation {
     return to_candid_record_n3(_uploadFile, _downloadFile, value);
 }
-function to_candid_opt_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _CaffeineStorageRefillInformation | null): [] | [__CaffeineStorageRefillInformation] {
-    return value === null ? candid_none() : candid_some(to_candid__CaffeineStorageRefillInformation_n2(_uploadFile, _downloadFile, value));
+function to_candid_opt_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ImmutableObjectStorageRefillInformation | null): [] | [__ImmutableObjectStorageRefillInformation] {
+    return value === null ? candid_none() : candid_some(to_candid__ImmutableObjectStorageRefillInformation_n2(_uploadFile, _downloadFile, value));
 }
 function to_candid_record_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     proposed_top_up_amount?: bigint;

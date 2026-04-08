@@ -14,11 +14,6 @@ export class ExternalBlob {
     static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
     withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
 }
-export interface ShippingOption {
-    name: string;
-    itemPrice: bigint;
-    basePrice: bigint;
-}
 export interface Product {
     id: string;
     categoryId: string;
@@ -39,6 +34,14 @@ export interface Category {
     name: string;
     description: string;
 }
+export interface Address {
+    zip: string;
+    street: string;
+    country: string;
+    city: string;
+    name: string;
+    state: string;
+}
 export interface TransformationOutput {
     status: bigint;
     body: Uint8Array;
@@ -50,16 +53,16 @@ export interface ContactForm {
     message: string;
     timestamp: bigint;
 }
+export interface AnnouncementBanner {
+    enabled: boolean;
+    message: string;
+}
 export interface SocialLinks {
     tiktok: string;
     twitch: string;
     instagram: string;
     kick: string;
     youtube: string;
-}
-export interface AnnouncementBanner {
-    enabled: boolean;
-    message: string;
 }
 export interface HeroSection {
     tagline: string;
@@ -98,22 +101,20 @@ export interface TransformationInput {
     response: http_request_result;
 }
 export interface ShippingRates {
-    australia: bigint;
-    usExpress: bigint;
-    usOvernight: bigint;
-    usStandard: bigint;
-    canada: bigint;
-    restOfWorld: bigint;
+    usEconomyBase: bigint;
+    restOfWorldPerItem: bigint;
+    usStandardPerItem: bigint;
+    australiaPerItem: bigint;
+    canadaPerItem: bigint;
+    restOfWorldBase: bigint;
+    canadaBase: bigint;
+    australiaBase: bigint;
+    usEconomyPerItem: bigint;
+    usExpressPerItem: bigint;
+    usExpressBase: bigint;
+    usStandardBase: bigint;
 }
 export type Color = string;
-export interface Address {
-    zip: string;
-    street: string;
-    country: string;
-    city: string;
-    name: string;
-    state: string;
-}
 export type StripeSessionStatus = {
     __kind__: "completed";
     completed: {
@@ -137,6 +138,11 @@ export interface NewsletterSubscriber {
 export interface UserProfile {
     name: string;
     email: string;
+}
+export interface ShippingOption {
+    name: string;
+    itemPrice: bigint;
+    basePrice: bigint;
 }
 export enum ProductStatus {
     hidden = "hidden",
@@ -162,7 +168,7 @@ export interface backendInterface {
     addCategory(category: Category): Promise<void>;
     addProduct(product: Product): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    calculateShipping(destination: string, productList: Array<Product>): Promise<bigint>;
+    calculateShipping(destination: string, method: string, itemCount: bigint): Promise<bigint>;
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
     createOrder(productList: Array<Product>, total: bigint, shippingAddress: Address, shippingOption: ShippingOption): Promise<Order | null>;
     deleteCategory(id: string): Promise<void>;

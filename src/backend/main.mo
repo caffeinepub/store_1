@@ -1,20 +1,21 @@
-import Storage "blob-storage/Storage";
-import MixinStorage "blob-storage/Mixin";
-import MixinAuthorization "authorization/MixinAuthorization";
-import Stripe "stripe/stripe";
-import AccessControl "authorization/access-control";
+import Storage "mo:caffeineai-object-storage/Storage";
+import MixinObjectStorage "mo:caffeineai-object-storage/Mixin";
+import MixinAuthorization "mo:caffeineai-authorization/MixinAuthorization";
+import Stripe "mo:caffeineai-stripe/stripe";
+import AccessControl "mo:caffeineai-authorization/access-control";
 import Map "mo:core/Map";
+import List "mo:core/List";
 import Text "mo:core/Text";
 import Time "mo:core/Time";
 import Int "mo:core/Int";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
-import OutCall "http-outcalls/outcall";
+import OutCall "mo:caffeineai-http-outcalls/outcall";
 
 
 
 actor {
-  include MixinStorage();
+  include MixinObjectStorage();
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
@@ -534,16 +535,10 @@ actor {
     stripeConfig != null;
   };
 
-  func getStripeConfiguration() : Stripe.StripeConfiguration {
+  func getStripeSecretKey() : Text {
     switch (stripeConfig) {
       case (null) { Runtime.trap("Stripe needs to be first configured") };
-      case (?config) {
-        // Always use the full comprehensive country list
-        {
-          secretKey = config.secretKey;
-          allowedCountries = allShippingCountries;
-        };
-      };
+      case (?config) { config.secretKey };
     };
   };
 
@@ -551,12 +546,75 @@ actor {
     OutCall.transform(input);
   };
 
+  func urlEncodeStripe(text : Text) : Text {
+    text.replace(#char ' ', "%20").replace(#char '&', "%26").replace(#char '=', "%3D");
+  };
+
+  // Build the Stripe checkout session request body manually.
+  // CRITICAL: Uses empty-bracket [] notation per Stripe docs for allowed_countries.
+  // The caffeineai-stripe library uses [0] for every country (bug), so we bypass it
+  // and call the Stripe API directly with correct serialization.
+  // DO NOT change [] to [0] in the country params — [0] causes only Zimbabwe to be sent.
+  func buildStripeBody(items : [Stripe.ShoppingItem], callerText : Text, successUrl : Text, cancelUrl : Text) : Text {
+    let params = List.empty<Text>();
+
+    // Line items
+    var index = 0;
+    for (item in items.vals()) {
+      let i = index.toText();
+      params.add("line_items[" # i # "][price_data][currency]=" # urlEncodeStripe(item.currency));
+      params.add("line_items[" # i # "][price_data][product_data][name]=" # urlEncodeStripe(item.productName));
+      params.add("line_items[" # i # "][price_data][product_data][description]=" # urlEncodeStripe(item.productDescription));
+      params.add("line_items[" # i # "][price_data][unit_amount]=" # item.priceInCents.toText());
+      params.add("line_items[" # i # "][quantity]=" # item.quantity.toText());
+      index += 1;
+    };
+
+    // Mode and URLs
+    params.add("mode=payment");
+    params.add("success_url=" # urlEncodeStripe(successUrl));
+    params.add("cancel_url=" # urlEncodeStripe(cancelUrl));
+    params.add("client_reference_id=" # urlEncodeStripe(callerText));
+
+    // Billing address — always collect
+    params.add("billing_address_collection=required");
+
+    // Phone number — always collect
+    params.add("phone_number_collection[enabled]=true");
+
+    // Shipping address — collect for ALL countries using [] notation (not [0]).
+    // Each entry appends to the array on Stripe's side. This is the correct format
+    // per Stripe docs: shipping_address_collection[allowed_countries][]=US
+    // Using [0] for every iteration (as the library does) means only the last country survives.
+    for (country in allShippingCountries.vals()) {
+      params.add("shipping_address_collection[allowed_countries][]=" # urlEncodeStripe(country));
+    };
+
+    params.values().join("&");
+  };
+
+  // Custom createCheckoutSession that bypasses the caffeineai-stripe library's broken
+  // allowedCountries serialization. Calls Stripe API directly with correct [] notation.
   public shared ({ caller }) func createCheckoutSession(items : [Stripe.ShoppingItem], successUrl : Text, cancelUrl : Text) : async Text {
-    await Stripe.createCheckoutSession(getStripeConfiguration(), caller, items, successUrl, cancelUrl, transform);
+    let secretKey = getStripeSecretKey();
+    let body = buildStripeBody(items, caller.toText(), successUrl, cancelUrl);
+    let headers = [
+      { name = "authorization"; value = "Bearer " # secretKey },
+      { name = "content-type"; value = "application/x-www-form-urlencoded" },
+    ];
+    try {
+      await OutCall.httpPostRequest("https://api.stripe.com/v1/checkout/sessions", headers, body, transform);
+    } catch (error) {
+      Runtime.trap("Failed to create checkout session: " # error.message());
+    };
   };
 
   public shared ({ caller }) func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
-    await Stripe.getSessionStatus(getStripeConfiguration(), sessionId, transform);
+    let config : Stripe.StripeConfiguration = {
+      secretKey = getStripeSecretKey();
+      allowedCountries = [];
+    };
+    await Stripe.getSessionStatus(config, sessionId, transform);
   };
 
   // Hero Section and Social Links
